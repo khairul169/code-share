@@ -7,8 +7,7 @@ body {
 }
 
 .cm-theme {
-  font-size: 16px;
-  @apply h-full;
+  @apply h-full md:text-[16px];
 }
 
 .cm-editor {
@@ -22,6 +21,6 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

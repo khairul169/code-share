@@ -21,7 +21,10 @@ const ConsoleLogger = forwardRef((_, ref: any) => {
         return;
       }
 
-      if (data.args[0]?.includes("Babel transformer")) {
+      if (
+        typeof data.args[0] === "string" &&
+        data.args[0]?.includes("Babel transformer")
+      ) {
         return;
       }
 

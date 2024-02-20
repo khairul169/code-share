@@ -10,16 +10,7 @@ type Props = {
 };
 
 const Providers = ({ children }: Props) => {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
+  const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -27,6 +18,9 @@ const Providers = ({ children }: Props) => {
           url: getBaseUrl() + "/api/trpc",
           headers() {
             return {};
+          },
+          fetch(input, init = {}) {
+            return fetch(input, { ...init, cache: "no-store" });
           },
         }),
       ],

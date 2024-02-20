@@ -16,7 +16,7 @@ const ActionButton = forwardRef(
         variant="ghost"
         size="sm"
         className={cn(
-          "text-slate-400 hover:bg-transparent hover:dark:bg-transparent h-8 w-6 p-0",
+          "text-slate-400 hover:bg-transparent hover:dark:bg-transparent h-8 w-6 p-0 flex-shrink-0",
           className
         )}
         onClick={(e) => {

@@ -108,26 +108,28 @@ const TabItem = ({
   const filename = title.substring(0, lastDotFile);
 
   return (
-    <button
+    <div
       data-idx={index}
       className={cn(
-        "group border-b-2 border-transparent truncate flex-shrink-0 text-white text-center max-w-[140px] md:max-w-[180px] pl-4 pr-0 text-sm flex items-center gap-0 relative z-[1]",
-        isActive ? "border-slate-500" : ""
+        "group border-b-2 border-transparent truncate flex-shrink-0 text-white/70 transition-all hover:text-white text-center max-w-[140px] md:max-w-[180px] text-sm flex items-center gap-0 relative z-[1]",
+        isActive ? "border-slate-500 text-white" : ""
       )}
       onClick={onSelect}
     >
-      <FileIcon
-        file={{ isDirectory: false, filename: title }}
-        className="mr-1"
-      />
-      <span className="truncate">{filename}</span>
-      <span>{ext}</span>
+      <button className="pl-4 pr-0 truncate flex items-center self-stretch">
+        <FileIcon
+          file={{ isDirectory: false, filename: title }}
+          className="mr-1"
+        />
+        <span className="truncate">{filename}</span>
+        <span>{ext}</span>
+      </button>
       <ActionButton
         icon={FiX}
         className="opacity-0 group-hover:opacity-100 transition-colors"
         onClick={onClose}
       />
-    </button>
+    </div>
   );
 };
 

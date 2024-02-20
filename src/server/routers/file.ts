@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import db from "../db";
 import { procedure, router } from "../trpc";
 import { file, insertFileSchema, selectFileSchema } from "../db/schema/file";
@@ -9,7 +9,7 @@ const fileRouter = router({
   getAll: procedure
     .input(
       z
-        .object({ id: z.number().array().min(1) })
+        .object({ id: z.number().array().min(1), isPinned: z.boolean() })
         .partial()
         .optional()
     )
@@ -17,9 +17,10 @@ const fileRouter = router({
       const files = await db.query.file.findMany({
         where: and(
           isNull(file.deletedAt),
-          opt?.id && opt.id.length > 0 ? inArray(file.id, opt.id) : undefined
+          opt?.id && opt.id.length > 0 ? inArray(file.id, opt.id) : undefined,
+          opt?.isPinned ? eq(file.isPinned, true) : undefined
         ),
-        orderBy: [desc(file.isDirectory)],
+        orderBy: [desc(file.isDirectory), asc(file.filename)],
         columns: { content: false },
       });
 

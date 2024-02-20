@@ -1,33 +1,48 @@
+"use client";
+
 /* eslint-disable react/display-name */
 import Panel from "@/components/ui/panel";
-import React, { forwardRef, useCallback, useEffect, useRef } from "react";
+import { useParams } from "next/navigation";
+import React, { Fragment, useCallback, useEffect, useRef } from "react";
+import { createStore } from "zustand";
+import { useProjectContext } from "../context/project";
 
-type Props = {};
+type PreviewStore = {
+  refresh: () => void;
+};
 
-const WebPreview = forwardRef((props: Props, ref: any) => {
+export const previewStore = createStore<PreviewStore>(() => ({
+  refresh: () => {},
+}));
+
+const WebPreview = () => {
+  const { slug } = useParams();
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const project = useProjectContext();
 
   const refresh = useCallback(() => {
     if (frameRef.current) {
-      frameRef.current.src = `/api/file/index.html?index=true`;
+      frameRef.current.src = `/project/${slug}/file/index.html?t=${Date.now()}`;
     }
-  }, []);
+  }, [slug]);
 
   useEffect(() => {
-    if (ref) {
-      ref.current = { refresh };
-    }
-  }, [ref, refresh]);
+    previewStore.setState({ refresh });
+    refresh();
+  }, [refresh]);
+
+  const PanelComponent = !project.isCompact ? Panel : Fragment;
 
   return (
-    <Panel>
+    <PanelComponent>
       <iframe
+        id="web-preview"
         ref={frameRef}
         className="border-none w-full h-full bg-white"
         sandbox="allow-scripts"
       />
-    </Panel>
+    </PanelComponent>
   );
-});
+};
 
 export default WebPreview;

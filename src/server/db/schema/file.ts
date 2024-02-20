@@ -18,11 +18,14 @@ export const file = sqliteTable(
       .notNull()
       .references(() => user.id),
     path: text("path").notNull().unique(),
-    filename: text("filename").notNull().unique(),
+    filename: text("filename").notNull(),
     isDirectory: integer("is_directory", { mode: "boolean" })
       .notNull()
       .default(false),
     isFile: integer("is_file", { mode: "boolean" }).notNull().default(false),
+    isPinned: integer("is_pinned", { mode: "boolean" })
+      .notNull()
+      .default(false),
     content: text("content"),
     createdAt: text("created_at")
       .notNull()

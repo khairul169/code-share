@@ -10,8 +10,7 @@ type Props = {
   onFileContentChange?: () => void;
 };
 
-const FilePreview = ({ id, onFileContentChange }: Props) => {
-  const type = "text";
+const FileViewer = ({ id, onFileContentChange }: Props) => {
   const { data, isLoading, refetch } = trpc.file.getById.useQuery(id);
   const updateFileContent = trpc.file.update.useMutation({
     onSuccess: () => {
@@ -23,13 +22,13 @@ const FilePreview = ({ id, onFileContentChange }: Props) => {
   if (isLoading) {
     return <p>Loading...</p>;
   }
-  if (!data) {
+  if (!data || data.isDirectory) {
     return <p>File not found.</p>;
   }
 
   const { filename } = data;
 
-  if (type === "text") {
+  if (!data.isFile) {
     const ext = getFileExt(filename);
 
     return (
@@ -45,4 +44,4 @@ const FilePreview = ({ id, onFileContentChange }: Props) => {
   return null;
 };
 
-export default FilePreview;
+export default FileViewer;

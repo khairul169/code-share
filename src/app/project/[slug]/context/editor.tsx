@@ -1,21 +1,21 @@
 import type { FileSchema } from "@/server/db/schema/file";
 import { createContext, useContext } from "react";
 
-type TProjectViewContext = {
+type TEditorContext = {
   onOpenFile: (fileId: number) => void;
   onFileChanged: (file: Omit<FileSchema, "content">) => void;
   onDeleteFile: (fileId: number) => void;
 };
 
-const ProjectViewContext = createContext<TProjectViewContext | null>(null);
+const EditorContext = createContext<TEditorContext | null>(null);
 
-export const useProjectContext = () => {
-  const ctx = useContext(ProjectViewContext);
+export const useEditorContext = () => {
+  const ctx = useContext(EditorContext);
   if (!ctx) {
-    throw new Error("Component not in ProjectViewContext!");
+    throw new Error("Component not in EditorContext!");
   }
 
   return ctx;
 };
 
-export default ProjectViewContext;
+export default EditorContext;

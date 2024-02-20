@@ -7,6 +7,7 @@ import ReactCodeMirror, {
 import { javascript } from "@codemirror/lang-javascript";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
+import { json } from "@codemirror/lang-json";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
@@ -17,17 +18,19 @@ import prettierBabelPlugin from "prettier/plugins/babel";
 import * as prettierPluginEstree from "prettier/plugins/estree";
 import { abbreviationTracker } from "@emmetio/codemirror6-plugin";
 import { useDebounce } from "@/hooks/useDebounce";
+import useCommandKey from "@/hooks/useCommandKey";
 
 type Props = {
   lang?: string;
   value: string;
+  wordWrap?: boolean;
   onChange: (val: string) => void;
   formatOnSave?: boolean;
 };
 
 const CodeEditor = (props: Props) => {
   const codeMirror = useRef<ReactCodeMirrorRef>(null);
-  const { lang, value, formatOnSave, onChange } = props;
+  const { lang, value, formatOnSave, wordWrap, onChange } = props;
   const [data, setData] = useState(value);
   const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
   const langMetadata = useMemo(() => getLangMetadata(lang || "plain"), [lang]);
@@ -69,35 +72,29 @@ const CodeEditor = (props: Props) => {
     }
 
     setTimeout(() => resetDebounceChange(), 100);
-  }, [data, setData, formatOnSave, langMetadata, resetDebounceChange]);
+  }, [
+    data,
+    langMetadata.formatter,
+    formatOnSave,
+    onChange,
+    resetDebounceChange,
+  ]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-        e.preventDefault();
-        e.stopPropagation();
-        onSave();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onSave]);
+  useCommandKey("s", onSave);
 
   useEffect(() => {
     setData(value);
   }, [value]);
 
+  const extensions = [...langMetadata.extensions, keymap.of(vscodeKeymap)];
+  if (wordWrap) {
+    extensions.push(EditorView.lineWrapping);
+  }
+
   return (
     <ReactCodeMirror
       ref={codeMirror}
-      extensions={[
-        EditorView.lineWrapping,
-        ...langMetadata.extensions,
-        keymap.of(vscodeKeymap),
-      ]}
+      extensions={extensions}
       indentWithTab={false}
       basicSetup={{ defaultKeymap: false }}
       value={data}
@@ -123,6 +120,10 @@ function getLangMetadata(lang: string) {
     case "css":
       extensions = [css()];
       formatter = ["css", prettierCssPlugin];
+      break;
+    case "json":
+      extensions = [json()];
+      formatter = ["json", prettierBabelPlugin, prettierPluginEstree];
       break;
     case "jsx":
     case "js":
