@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
+import { IS_DEV } from "@/lib/consts";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,7 +17,7 @@ type Props = {
 
 const RootLayout = ({ children }: Props) => {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning={IS_DEV}>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>

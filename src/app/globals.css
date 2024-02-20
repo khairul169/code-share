@@ -3,9 +3,25 @@
 @tailwind utilities;
 
 body {
-  @apply bg-slate-400 text-white;
+  @apply bg-slate-600 text-white;
 }
 
 .cm-theme {
+  font-size: 16px;
   @apply h-full;
+}
+
+.cm-editor {
+  @apply py-2;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

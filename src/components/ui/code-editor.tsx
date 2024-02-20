@@ -1,44 +1,90 @@
 /* eslint-disable react/display-name */
-import ReactCodeMirror, { EditorView } from "@uiw/react-codemirror";
+import ReactCodeMirror, {
+  EditorView,
+  ReactCodeMirrorRef,
+  keymap,
+} from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
-import { useDebounceCallback } from "usehooks-ts";
+import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
+import prettier from "prettier/standalone";
+import prettierHtmlPlugin from "prettier/plugins/html";
+import prettierCssPlugin from "prettier/plugins/postcss";
+import prettierBabelPlugin from "prettier/plugins/babel";
+import * as prettierPluginEstree from "prettier/plugins/estree";
+import { abbreviationTracker } from "@emmetio/codemirror6-plugin";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type Props = {
   lang?: string;
   value: string;
   onChange: (val: string) => void;
+  formatOnSave?: boolean;
 };
 
-const CodeEditor = forwardRef(({ lang, value, onChange }: Props, ref: any) => {
+const CodeEditor = (props: Props) => {
+  const codeMirror = useRef<ReactCodeMirrorRef>(null);
+  const { lang, value, formatOnSave, onChange } = props;
   const [data, setData] = useState(value);
-  const debounceValue = useDebounceCallback(onChange, 100);
+  const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
+  const langMetadata = useMemo(() => getLangMetadata(lang || "plain"), [lang]);
 
-  const extensions = useMemo(() => {
-    const e: any[] = [];
+  const onSave = useCallback(async () => {
+    try {
+      const cm = codeMirror.current?.view;
+      const content = cm ? cm.state.doc.toString() : data;
+      const formatter = langMetadata.formatter;
 
-    switch (lang) {
-      case "html":
-        e.push(html({ selfClosingTags: true }));
-      case "css":
-        e.push(css());
-      case "jsx":
-      case "js":
-      case "ts":
-      case "tsx":
-        e.push(
-          javascript({
-            jsx: ["jsx", "tsx"].includes(lang),
-            typescript: ["tsx", "ts"].includes(lang),
-          })
+      if (formatOnSave && cm && formatter != null) {
+        const [parser, ...plugins] = formatter;
+        const cursor = cm.state.selection.main.head || 0;
+        const { formatted, cursorOffset } = await prettier.formatWithCursor(
+          content,
+          {
+            parser,
+            plugins,
+            cursorOffset: cursor,
+          }
         );
+
+        setData(formatted);
+        onChange(formatted);
+
+        if (cm) {
+          cm.dispatch({
+            changes: { from: 0, to: cm?.state.doc.length, insert: formatted },
+          });
+          cm.dispatch({
+            selection: { anchor: cursorOffset },
+          });
+        }
+      } else {
+        onChange(content);
+      }
+    } catch (err) {
+      console.log("prettier error", err);
     }
 
-    return e;
-  }, [lang]);
+    setTimeout(() => resetDebounceChange(), 100);
+  }, [data, setData, formatOnSave, langMetadata, resetDebounceChange]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        e.stopPropagation();
+        onSave();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onSave]);
 
   useEffect(() => {
     setData(value);
@@ -46,17 +92,53 @@ const CodeEditor = forwardRef(({ lang, value, onChange }: Props, ref: any) => {
 
   return (
     <ReactCodeMirror
-      ref={ref}
-      extensions={[EditorView.lineWrapping, ...extensions]}
+      ref={codeMirror}
+      extensions={[
+        EditorView.lineWrapping,
+        ...langMetadata.extensions,
+        keymap.of(vscodeKeymap),
+      ]}
+      indentWithTab={false}
+      basicSetup={{ defaultKeymap: false }}
       value={data}
       onChange={(val) => {
         setData(val);
-        debounceValue(val);
+        debounceChange(val);
       }}
       height="100%"
       theme={tokyoNight}
     />
   );
-});
+};
+
+function getLangMetadata(lang: string) {
+  let extensions: any[] = [];
+  let formatter: any = null;
+
+  switch (lang) {
+    case "html":
+      extensions = [html({ selfClosingTags: true }), abbreviationTracker()];
+      formatter = ["html", prettierHtmlPlugin];
+      break;
+    case "css":
+      extensions = [css()];
+      formatter = ["css", prettierCssPlugin];
+      break;
+    case "jsx":
+    case "js":
+    case "ts":
+    case "tsx":
+      extensions = [
+        javascript({
+          jsx: ["jsx", "tsx"].includes(lang),
+          typescript: ["tsx", "ts"].includes(lang),
+        }),
+      ];
+      formatter = ["babel", prettierBabelPlugin, prettierPluginEstree];
+      break;
+  }
+
+  return { extensions, formatter };
+}
 
 export default CodeEditor;
