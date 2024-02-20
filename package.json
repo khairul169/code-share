@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently --kill-others \"next dev\" \"npm run transformer:dev\"",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build && npm run transformer:build",
+    "start": "concurrently --kill-others \"next start\" \"npm run transformer:start\"",
     "lint": "next lint",
     "generate": "drizzle-kit generate:sqlite",
     "drop": "drizzle-kit drop",
@@ -13,9 +13,9 @@
     "migrate": "tsx src/server/db/migrate.ts",
     "seed": "tsx src/server/db/seed.ts",
     "reset": "rm -f storage/database.db && npm run push && npm run seed",
-    "transformer:start": "tsx src/server/transformer/server.ts",
+    "transformer:start": "node dist/transformer/server.js",
     "transformer:dev": "tsx --watch src/server/transformer/server.ts",
-    "transformer:build": "tsc -p tsconfig-transformer.json"
+    "transformer:build": "tsc --project tsconfig-server.json"
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.23.3",
