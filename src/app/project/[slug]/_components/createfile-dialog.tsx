@@ -1,24 +1,33 @@
 import React, { useMemo } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../../components/ui/dialog";
 import { UseDiscloseReturn } from "@/hooks/useDisclose";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Input } from "../../../../components/ui/input";
+import { Button } from "../../../../components/ui/button";
 import { useForm } from "@/hooks/useForm";
 import { z } from "zod";
-import FormErrorMessage from "../ui/form-error-message";
+import FormErrorMessage from "../../../../components/ui/form-error-message";
 import trpc from "@/lib/trpc";
 import type { FileSchema } from "@/server/db/schema/file";
+import { useWatch } from "react-hook-form";
 
 type Props = {
-  disclose: UseDiscloseReturn;
+  disclose: UseDiscloseReturn<CreateFileSchema>;
   onSuccess?: (file: FileSchema, type: "create" | "update") => void;
 };
 
 const fileSchema = z.object({
   id: z.number().optional(),
-  parentId: z.number().optional(),
+  parentId: z.number().optional().nullable(),
   filename: z.string().min(1),
+  isDirectory: z.boolean().optional(),
 });
+
+export type CreateFileSchema = z.infer<typeof fileSchema>;
 
 const defaultValues: z.infer<typeof fileSchema> = {
   filename: "",
@@ -26,6 +35,8 @@ const defaultValues: z.infer<typeof fileSchema> = {
 
 const CreateFileDialog = ({ disclose, onSuccess }: Props) => {
   const form = useForm(fileSchema, disclose.data || defaultValues);
+  const isDir = useWatch({ name: "isDirectory", control: form.control });
+
   const create = trpc.file.create.useMutation({
     onSuccess(data) {
       if (onSuccess) onSuccess(data, "create");
@@ -55,20 +66,25 @@ const CreateFileDialog = ({ disclose, onSuccess }: Props) => {
     <Dialog open={disclose.isOpen} onOpenChange={disclose.onChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create File</DialogTitle>
+          <DialogTitle>
+            {[
+              !disclose.data?.id ? "Create" : "Rename",
+              isDir ? "Directory" : "File",
+            ].join(" ")}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={onSubmit}>
           <FormErrorMessage form={form} />
 
           <Input
-            placeholder="Filename"
+            placeholder={isDir ? "Directory Name" : "Filename"}
             autoFocus
             {...form.register("filename")}
           />
 
           <div className="flex justify-end gap-4 mt-4">
-            <Button size="sm" variant="ghost">
+            <Button size="sm" variant="ghost" onClick={disclose.onClose}>
               Cancel
             </Button>
             <Button type="submit" size="sm">

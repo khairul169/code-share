@@ -2,20 +2,20 @@
 
 import { getFileExt } from "@/lib/utils";
 import React from "react";
-import CodeEditor from "../ui/code-editor";
+import CodeEditor from "../../../../components/ui/code-editor";
 import trpc from "@/lib/trpc";
 
 type Props = {
   id: number;
-  onFileChange?: () => void;
+  onFileContentChange?: () => void;
 };
 
-const FilePreview = ({ id, onFileChange }: Props) => {
+const FilePreview = ({ id, onFileContentChange }: Props) => {
   const type = "text";
   const { data, isLoading, refetch } = trpc.file.getById.useQuery(id);
   const updateFileContent = trpc.file.update.useMutation({
     onSuccess: () => {
-      if (onFileChange) onFileChange();
+      if (onFileContentChange) onFileContentChange();
       refetch();
     },
   });

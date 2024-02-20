@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
 
-export const useDisclose = () => {
+export const useDisclose = <T = any>() => {
   const [isOpen, setOpen] = useState(false);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<T | null | undefined>(null);
 
   const onOpen = useCallback(
-    (_data?: any) => {
+    (_data?: T | null) => {
       setOpen(true);
-      setData(data);
+      setData(_data);
     },
     [setOpen]
   );
@@ -19,4 +19,4 @@ export const useDisclose = () => {
   return { isOpen, onOpen, onClose, onChange: setOpen, data };
 };
 
-export type UseDiscloseReturn = ReturnType<typeof useDisclose>;
+export type UseDiscloseReturn<T = any> = ReturnType<typeof useDisclose<T>>;
