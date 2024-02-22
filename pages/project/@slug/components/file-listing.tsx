@@ -1,6 +1,4 @@
-"use client";
-
-import React, { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { UseDiscloseReturn, useDisclose } from "~/hooks/useDisclose";
 import {
   FiChevronRight,
@@ -21,27 +19,28 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
-import { cn, getUrl } from "~/lib/utils";
+import { cn, getPreviewUrl } from "~/lib/utils";
 import FileIcon from "~/components/ui/file-icon";
 import copy from "copy-to-clipboard";
-import { useData, useParams } from "~/renderer/hooks";
+import { useData } from "~/renderer/hooks";
 import Spinner from "~/components/ui/spinner";
 import { Data } from "../+data";
 
 const FileListing = () => {
-  const pageData = useData<Data>();
+  const { project, files: initialFiles } = useData<Data>();
   const { onOpenFile, onFileChanged } = useEditorContext();
   const createFileDlg = useDisclose<CreateFileSchema>();
-  const files = trpc.file.getAll.useQuery(undefined, {
-    initialData: pageData.files,
-  });
+  const files = trpc.file.getAll.useQuery(
+    { projectId: project.id },
+    { initialData: initialFiles }
+  );
 
   const fileList = useMemo(() => groupFiles(files.data, null), [files.data]);
 
   return (
     <Fragment>
       <div className="h-10 flex items-center pl-4 pr-1">
-        <p className="text-xs uppercase truncate flex-1">My Project</p>
+        <p className="text-xs uppercase truncate flex-1">{project.title}</p>
         <ActionButton
           icon={FiFilePlus}
           onClick={() => createFileDlg.onOpen()}
@@ -104,7 +103,7 @@ type FileItemProps = {
 };
 
 const FileItem = ({ file, createFileDlg }: FileItemProps) => {
-  const { slug } = useParams();
+  const { project } = useData<Data>();
   const { onOpenFile, onDeleteFile } = useEditorContext();
   const [isCollapsed, setCollapsed] = useState(false);
   const trpcUtils = trpc.useUtils();
@@ -186,16 +185,13 @@ const FileItem = ({ file, createFileDlg }: FileItemProps) => {
                 Copy Path
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => copy(getUrl(`api/preview/${slug}`, file.path))}
+                onClick={() => copy(getPreviewUrl(project, file))}
               >
                 Copy URL
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
-                  window.open(
-                    getUrl(`api/preview/${slug}`, file.path),
-                    "_blank"
-                  )
+                  window.open(getPreviewUrl(project, file), "_blank")
                 }
               >
                 Open in new tab

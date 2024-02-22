@@ -1,9 +1,12 @@
-export const data = async () => {
-  const posts = await fetch(
-    "https://jsonplaceholder.typicode.com/posts?_limit=20"
-  ).then((response) => response.json());
+import { PageContext } from "vike/types";
+import trpcServer from "~/server/api/trpc/trpc";
 
-  return { posts };
+export const data = async (ctx: PageContext) => {
+  const trpc = await trpcServer(ctx);
+
+  const projects = await trpc.project.getAll();
+
+  return { projects };
 };
 
 export type Data = Awaited<ReturnType<typeof data>>;

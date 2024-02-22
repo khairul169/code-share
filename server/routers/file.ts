@@ -8,17 +8,19 @@ import { TRPCError } from "@trpc/server";
 const fileRouter = router({
   getAll: procedure
     .input(
-      z
-        .object({ id: z.number().array().min(1), isPinned: z.boolean() })
-        .partial()
-        .optional()
+      z.object({
+        projectId: z.number(),
+        id: z.number().array().min(1).optional(),
+        isPinned: z.boolean().optional(),
+      })
     )
     .query(async ({ input: opt }) => {
       const files = await db.query.file.findMany({
         where: and(
+          eq(file.projectId, opt.projectId),
           isNull(file.deletedAt),
-          opt?.id && opt.id.length > 0 ? inArray(file.id, opt.id) : undefined,
-          opt?.isPinned ? eq(file.isPinned, true) : undefined
+          opt.id && opt.id.length > 0 ? inArray(file.id, opt.id) : undefined,
+          opt.isPinned ? eq(file.isPinned, true) : undefined
         ),
         orderBy: [desc(file.isDirectory), asc(file.filename)],
         columns: !file.isPinned ? { content: true } : undefined,
@@ -55,7 +57,7 @@ const fileRouter = router({
       }
 
       const data: z.infer<typeof insertFileSchema> = {
-        userId: 1,
+        projectId: 1,
         parentId: input.parentId,
         path: basePath + input.filename,
         filename: input.filename,

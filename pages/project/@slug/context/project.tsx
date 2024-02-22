@@ -1,7 +1,8 @@
 import { createContext, useContext } from "react";
+import type { ProjectSchema } from "~/server/db/schema/project";
 
 type TProjectContext = {
-  slug: string;
+  project: ProjectSchema;
   isCompact?: boolean;
 };
 

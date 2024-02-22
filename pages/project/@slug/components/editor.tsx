@@ -23,9 +23,9 @@ import { Data } from "../+data";
 import { useBreakpoint } from "~/hooks/useBreakpoint";
 
 const Editor = () => {
-  const { pinnedFiles } = useData<Data>();
+  const { project, pinnedFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
-  const project = useProjectContext();
+  const projectCtx = useProjectContext();
   const sidebarPanel = useRef<ImperativePanelHandle>(null);
   const [breakpoint] = useBreakpoint();
 
@@ -36,7 +36,7 @@ const Editor = () => {
   );
 
   const openedFilesData = trpc.file.getAll.useQuery(
-    { id: curOpenFiles },
+    { projectId: project.id, id: curOpenFiles },
     { enabled: curOpenFiles.length > 0, initialData: pinnedFiles }
   );
   const [openedFiles, setOpenedFiles] = useState<any[]>(pinnedFiles);
@@ -156,7 +156,7 @@ const Editor = () => {
     }) satisfies Tab[];
   }, [curOpenFiles, openedFiles, refreshPreview]);
 
-  const PanelComponent = !project.isCompact ? Panel : "div";
+  const PanelComponent = !projectCtx.isCompact ? Panel : "div";
 
   return (
     <EditorContext.Provider

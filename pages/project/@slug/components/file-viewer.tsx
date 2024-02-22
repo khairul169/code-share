@@ -1,5 +1,3 @@
-"use client";
-
 import { getFileExt } from "~/lib/utils";
 import CodeEditor from "../../../../components/ui/code-editor";
 import trpc from "~/lib/trpc";

@@ -7,15 +7,26 @@ import { serveHtml } from "./serve-html";
 import { serveJs } from "./serve-js";
 import { getMimeType } from "~/server/lib/mime";
 import { postcss } from "./postcss";
+import { project } from "~/server/db/schema/project";
 
 const get = async (req: Request, res: Response) => {
   const { slug, ...pathParams } = req.params as any;
   const path = pathParams[0];
 
-  const fileData = await db.query.file.findFirst({
-    where: and(eq(file.path, path), isNull(file.deletedAt)),
+  const projectData = await db.query.project.findFirst({
+    where: and(eq(project.slug, slug), isNull(project.deletedAt)),
   });
+  if (!projectData) {
+    return res.status(404).send("Project not found!");
+  }
 
+  const fileData = await db.query.file.findFirst({
+    where: and(
+      eq(file.projectId, projectData.id),
+      eq(file.path, path),
+      isNull(file.deletedAt)
+    ),
+  });
   if (!fileData) {
     return res.status(404).send("File not found!");
   }

@@ -3,19 +3,15 @@ import { useData } from "~/renderer/hooks";
 import Link from "~/renderer/link";
 
 const HomePage = () => {
-  const { posts } = useData<Data>();
-
-  if (!posts?.length) {
-    return <p>No posts.</p>;
-  }
+  const { projects } = useData<Data>();
 
   return (
     <div>
       <h1>Posts</h1>
 
-      {posts.map((post: any) => (
-        <Link key={post.id} href={`/${post.id}`}>
-          {post.title}
+      {projects.map((project: any) => (
+        <Link key={project.id} href={`/${project.slug}`}>
+          {project.title}
         </Link>
       ))}
     </div>

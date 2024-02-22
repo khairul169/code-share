@@ -1,2 +1,3 @@
 export { user } from "./user";
-export { file } from "./file";
+export { project, projectRelations } from "./project";
+export { file, fileRelations } from "./file";

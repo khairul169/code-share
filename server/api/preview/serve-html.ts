@@ -1,12 +1,12 @@
 import db from "~/server/db";
 import { FileSchema, file } from "~/server/db/schema/file";
 import { and, eq, isNull } from "drizzle-orm";
-
-const preventHtmlDirectAccess = `<script>if (window === window.parent) {window.location.href = '/';}</script>`;
+import { IS_DEV } from "~/server/lib/consts";
 
 export const serveHtml = async (fileData: FileSchema) => {
   const layout = await db.query.file.findFirst({
     where: and(
+      eq(file.projectId, fileData.projectId),
       eq(file.filename, "_layout.html"),
       fileData.parentId
         ? eq(file.parentId, fileData.parentId)
@@ -22,10 +22,14 @@ export const serveHtml = async (fileData: FileSchema) => {
 
   const bodyOpeningTagIdx = content.indexOf("<body");
   const firstScriptTagIdx = content.indexOf("<script", bodyOpeningTagIdx);
-  const injectScripts = [
-    '<script src="/js/hook-console.js"></script>',
-    preventHtmlDirectAccess,
-  ];
+  const injectScripts = ['<script src="/js/hook-console.js"></script>'];
+
+  if (!IS_DEV) {
+    // prevent direct access
+    injectScripts.push(
+      `<script>if (window === window.parent) {window.location.href = '/';}</script>`
+    );
+  }
 
   const importMaps = [
     { name: "react", url: "https://esm.sh/react@18.2.0" },

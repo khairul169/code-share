@@ -6,22 +6,21 @@ import {
 import WebPreview from "./components/web-preview";
 import Editor from "./components/editor";
 import ProjectContext from "./context/project";
-import { cn } from "~/lib/utils";
-import { useParams, useSearchParams } from "~/renderer/hooks";
-import { BASE_URL } from "~/lib/consts";
+import { cn, getPreviewUrl } from "~/lib/utils";
+import { useData, useSearchParams } from "~/renderer/hooks";
 import { withClientOnly } from "~/renderer/client-only";
 import Spinner from "~/components/ui/spinner";
+import { Data } from "./+data";
 
 const ViewProjectPage = () => {
+  const { project } = useData<Data>();
   const searchParams = useSearchParams();
-  const params = useParams();
   const isCompact =
     searchParams.get("compact") === "1" || searchParams.get("embed") === "1";
-  const slug = params["slug"];
-  const previewUrl = BASE_URL + `/api/preview/${slug}/index.html`;
+  const previewUrl = getPreviewUrl(project, "index.html");
 
   return (
-    <ProjectContext.Provider value={{ slug, isCompact }}>
+    <ProjectContext.Provider value={{ project, isCompact }}>
       <ResizablePanelGroup
         autoSaveId="main-panel"
         direction={{ sm: "vertical", md: "horizontal" }}
