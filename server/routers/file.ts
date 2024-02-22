@@ -21,7 +21,7 @@ const fileRouter = router({
           opt?.isPinned ? eq(file.isPinned, true) : undefined
         ),
         orderBy: [desc(file.isDirectory), asc(file.filename)],
-        columns: { content: false },
+        columns: !file.isPinned ? { content: true } : undefined,
       });
 
       return files;

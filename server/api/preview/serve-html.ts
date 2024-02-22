@@ -2,6 +2,8 @@ import db from "~/server/db";
 import { FileSchema, file } from "~/server/db/schema/file";
 import { and, eq, isNull } from "drizzle-orm";
 
+const preventHtmlDirectAccess = `<script>if (window === window.parent) {window.location.href = '/';}</script>`;
+
 export const serveHtml = async (fileData: FileSchema) => {
   const layout = await db.query.file.findFirst({
     where: and(
@@ -14,15 +16,16 @@ export const serveHtml = async (fileData: FileSchema) => {
   });
 
   let content = fileData.content || "";
-  if (!layout?.content) {
-    return content;
+  if (layout?.content != null) {
+    content = layout.content.replace("{CONTENT}", content);
   }
-
-  content = layout.content.replace("{CONTENT}", content);
 
   const bodyOpeningTagIdx = content.indexOf("<body");
   const firstScriptTagIdx = content.indexOf("<script", bodyOpeningTagIdx);
-  const injectScripts = ['<script src="/js/hook-console.js"></script>'];
+  const injectScripts = [
+    '<script src="/js/hook-console.js"></script>',
+    preventHtmlDirectAccess,
+  ];
 
   const importMaps = [
     { name: "react", url: "https://esm.sh/react@18.2.0" },
@@ -44,8 +47,6 @@ export const serveHtml = async (fileData: FileSchema) => {
       injectScripts.filter((i) => !!i).join("") +
       content.substring(firstScriptTagIdx);
   }
-
-  // content = content.replace(/ {2}|\r\n|\n|\r/gm, "");
 
   return content;
 };

@@ -1,16 +1,12 @@
+import { type Request, type Response, Router } from "express";
 import { getFileExt } from "~/lib/utils";
 import db from "~/server/db";
 import { file } from "~/server/db/schema/file";
 import { and, eq, isNull } from "drizzle-orm";
 import { serveHtml } from "./serve-html";
-import { Mime } from "mime/lite";
-import standardTypes from "mime/types/standard.js";
-import otherTypes from "mime/types/other.js";
 import { serveJs } from "./serve-js";
-import { type Request, type Response, Router } from "express";
-
-const mime = new Mime(standardTypes, otherTypes);
-mime.define({ "text/javascript": ["jsx", "tsx"] }, true);
+import { getMimeType } from "~/server/lib/mime";
+import { postcss } from "./postcss";
 
 const get = async (req: Request, res: Response) => {
   const { slug, ...pathParams } = req.params as any;
@@ -35,10 +31,11 @@ const get = async (req: Request, res: Response) => {
     content = await serveJs(fileData);
   }
 
-  res.setHeader(
-    "Content-Type",
-    mime.getType(fileData.filename) || "application/octet-stream"
-  );
+  if (["css"].includes(ext)) {
+    content = await postcss(fileData);
+  }
+
+  res.setHeader("Content-Type", getMimeType(fileData.filename));
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");

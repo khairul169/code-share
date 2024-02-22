@@ -31,24 +31,13 @@ const WebPreview = ({ url }: WebPreviewProps) => {
   return (
     <PanelComponent className="h-full flex flex-col bg-slate-800">
       <div className="h-10 flex items-center">
+        <p className="flex-1 truncate text-xs uppercase pl-4">Preview</p>
         <Button
           variant="ghost"
           className="dark:hover:bg-slate-700"
           onClick={refresh}
         >
           <FaRedo />
-        </Button>
-        <Input
-          className="flex-1 dark:bg-gray-900 dark:hover:bg-gray-950 h-8 rounded-full"
-          value={url || ""}
-          readOnly
-        />
-        <Button
-          variant="ghost"
-          className="dark:hover:bg-slate-700"
-          onClick={() => {}}
-        >
-          <FaEllipsisV />
         </Button>
       </div>
 

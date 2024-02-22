@@ -1,4 +1,5 @@
-//
+import type { Request } from "express";
+
 declare global {
   namespace Vike {
     interface PageContext {
@@ -12,6 +13,8 @@ declare global {
         description?: string;
       };
       abortReason?: string;
+      req: Request;
+      cookies: Record<string, string>;
     }
   }
 }

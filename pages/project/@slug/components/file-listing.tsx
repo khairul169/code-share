@@ -24,12 +24,17 @@ import {
 import { cn, getUrl } from "~/lib/utils";
 import FileIcon from "~/components/ui/file-icon";
 import copy from "copy-to-clipboard";
-import { useParams } from "~/renderer/hooks";
+import { useData, useParams } from "~/renderer/hooks";
+import Spinner from "~/components/ui/spinner";
+import { Data } from "../+data";
 
 const FileListing = () => {
+  const pageData = useData<Data>();
   const { onOpenFile, onFileChanged } = useEditorContext();
   const createFileDlg = useDisclose<CreateFileSchema>();
-  const files = trpc.file.getAll.useQuery();
+  const files = trpc.file.getAll.useQuery(undefined, {
+    initialData: pageData.files,
+  });
 
   const fileList = useMemo(() => groupFiles(files.data, null), [files.data]);
 
@@ -62,11 +67,17 @@ const FileListing = () => {
         </DropdownMenu>
       </div>
 
-      <div className="flex flex-col items-stretch flex-1 overflow-y-auto">
-        {fileList.map((file) => (
-          <FileItem key={file.id} file={file} createFileDlg={createFileDlg} />
-        ))}
-      </div>
+      {files.isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="flex flex-col items-stretch flex-1 overflow-y-auto">
+          {fileList.map((file) => (
+            <FileItem key={file.id} file={file} createFileDlg={createFileDlg} />
+          ))}
+        </div>
+      )}
 
       <CreateFileDialog
         disclose={createFileDlg}

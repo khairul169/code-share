@@ -9,6 +9,11 @@ const config = {
       "~": path.resolve("./"),
     },
   },
+  server: {
+    watch: {
+      ignored: [path.resolve(__dirname, "storage/**")],
+    },
+  },
 };
 
 export default config;

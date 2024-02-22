@@ -8,7 +8,6 @@ import { usePortrait } from "~/hooks/usePortrait";
 import Editor from "./components/editor";
 import ProjectContext from "./context/project";
 import { cn } from "~/lib/utils";
-import { withClientOnly } from "~/renderer/client-only";
 import { useParams, useSearchParams } from "~/renderer/hooks";
 import { BASE_URL } from "~/lib/consts";
 
@@ -29,6 +28,7 @@ const ViewProjectPage = () => {
         className={cn("w-full !h-dvh bg-slate-600", !isCompact ? "md:p-4" : "")}
       >
         <ResizablePanel
+          panelId={0}
           defaultSize={isPortrait ? 50 : 60}
           collapsible
           collapsedSize={0}
@@ -45,6 +45,7 @@ const ViewProjectPage = () => {
           }
         />
         <ResizablePanel
+          panelId={1}
           defaultSize={isPortrait ? 50 : 40}
           collapsible
           collapsedSize={0}
@@ -57,4 +58,4 @@ const ViewProjectPage = () => {
   );
 };
 
-export default withClientOnly(ViewProjectPage);
+export default ViewProjectPage;

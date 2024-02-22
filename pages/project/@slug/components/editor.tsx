@@ -9,7 +9,6 @@ import FileViewer from "./file-viewer";
 import trpc from "~/lib/trpc";
 import EditorContext from "../context/editor";
 import type { FileSchema } from "~/server/db/schema/file";
-import { usePortrait } from "~/hooks/usePortrait";
 import Panel from "~/components/ui/panel";
 import { previewStore } from "../stores/web-preview";
 import { useProjectContext } from "../context/project";
@@ -19,27 +18,26 @@ import useCommandKey from "~/hooks/useCommandKey";
 import { Button } from "~/components/ui/button";
 import { FaCompress, FaCompressArrowsAlt } from "react-icons/fa";
 import ConsoleLogger from "./console-logger";
+import { useData } from "~/renderer/hooks";
+import { Data } from "../+data";
 
 const Editor = () => {
-  const isPortrait = usePortrait();
+  const { pinnedFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
-  const [isMounted, setMounted] = useState(false);
   const project = useProjectContext();
   const sidebarPanel = useRef<ImperativePanelHandle>(null);
 
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [curTabIdx, setCurTabIdx] = useState(0);
-  const [curOpenFiles, setOpenFiles] = useState<number[]>([]);
-
-  const pinnedFiles = trpc.file.getAll.useQuery(
-    { isPinned: true },
-    { enabled: !isMounted }
+  const [curOpenFiles, setOpenFiles] = useState<number[]>(
+    pinnedFiles.map((i) => i.id)
   );
+
   const openedFilesData = trpc.file.getAll.useQuery(
     { id: curOpenFiles },
-    { enabled: curOpenFiles.length > 0 }
+    { enabled: curOpenFiles.length > 0, initialData: pinnedFiles }
   );
-  const [openedFiles, setOpenedFiles] = useState<any[]>([]);
+  const [openedFiles, setOpenedFiles] = useState<any[]>(pinnedFiles);
 
   const deleteFile = trpc.file.delete.useMutation({
     onSuccess: (file) => {
@@ -52,10 +50,6 @@ const Editor = () => {
       }
     },
   });
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleSidebar = useCallback(() => {
     const sidebar = sidebarPanel.current;
@@ -74,15 +68,19 @@ const Editor = () => {
   useCommandKey("b", toggleSidebar);
 
   useEffect(() => {
-    if (!pinnedFiles.data?.length || curOpenFiles.length > 0) {
+    if (!pinnedFiles?.length || curOpenFiles.length > 0) {
       return;
     }
 
-    pinnedFiles.data.forEach((file) => {
+    pinnedFiles.forEach((file) => {
       onOpenFile(file.id, false);
     });
+
+    return () => {
+      setOpenFiles([]);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pinnedFiles.data]);
+  }, [pinnedFiles]);
 
   useEffect(() => {
     if (openedFilesData.data) {
@@ -170,7 +168,8 @@ const Editor = () => {
         <ResizablePanelGroup autoSaveId="veditor-panel" direction="horizontal">
           <ResizablePanel
             ref={sidebarPanel}
-            defaultSize={isPortrait ? 0 : 25}
+            panelId={0}
+            defaultSize={25}
             minSize={10}
             collapsible
             collapsedSize={0}
@@ -183,12 +182,9 @@ const Editor = () => {
 
           <ResizableHandle className="bg-slate-900" />
 
-          <ResizablePanel defaultSize={isPortrait ? 100 : 75}>
-            <ResizablePanelGroup
-              autoCapitalize="code-editor"
-              direction="vertical"
-            >
-              <ResizablePanel defaultSize={isPortrait ? 100 : 80} minSize={20}>
+          <ResizablePanel panelId={1} defaultSize={75}>
+            <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
+              <ResizablePanel panelId={0} defaultSize={80} minSize={20}>
                 <Tabs
                   tabs={openFileList}
                   current={curTabIdx}
@@ -197,19 +193,16 @@ const Editor = () => {
                 />
               </ResizablePanel>
 
-              {!isPortrait ? (
-                <>
-                  <ResizableHandle />
-                  <ResizablePanel
-                    defaultSize={20}
-                    collapsible
-                    collapsedSize={0}
-                    minSize={10}
-                  >
-                    <ConsoleLogger />
-                  </ResizablePanel>
-                </>
-              ) : null}
+              <ResizableHandle />
+              <ResizablePanel
+                panelId={1}
+                defaultSize={20}
+                collapsible
+                collapsedSize={0}
+                minSize={10}
+              >
+                <ConsoleLogger />
+              </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>

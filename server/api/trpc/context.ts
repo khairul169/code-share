@@ -1,9 +1,6 @@
-import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { Request } from "express";
 
-export const createContext = async ({
-  req,
-  res,
-}: CreateExpressContextOptions) => {
+export const createContext = async ({ req }: { req: Request }) => {
   return {};
 };
 

@@ -50,6 +50,7 @@ const CodeEditor = (props: Props) => {
             parser,
             plugins,
             cursorOffset: cursor,
+            printWidth: 64,
           }
         );
 

@@ -1,6 +1,7 @@
 import express from "express";
 import { renderPage } from "vike/server";
 import { IS_DEV } from "./lib/consts";
+import cookieParser from "cookie-parser";
 import api from "./api";
 
 async function createServer() {
@@ -22,11 +23,13 @@ async function createServer() {
     app.use(express.static(root + "/dist/client"));
   }
 
+  app.use(cookieParser());
+
   app.use("/api", api);
 
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
-    const pageContext = {};
+    const pageContext = { req, cookies: req.cookies };
     const ctx = await renderPage({ urlOriginal: url, ...pageContext });
 
     const { httpResponse } = ctx;
