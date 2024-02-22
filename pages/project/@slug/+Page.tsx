@@ -4,15 +4,15 @@ import {
   ResizablePanelGroup,
 } from "~/components/ui/resizable";
 import WebPreview from "./components/web-preview";
-import { usePortrait } from "~/hooks/usePortrait";
 import Editor from "./components/editor";
 import ProjectContext from "./context/project";
 import { cn } from "~/lib/utils";
 import { useParams, useSearchParams } from "~/renderer/hooks";
 import { BASE_URL } from "~/lib/consts";
+import { withClientOnly } from "~/renderer/client-only";
+import Spinner from "~/components/ui/spinner";
 
 const ViewProjectPage = () => {
-  const isPortrait = usePortrait();
   const searchParams = useSearchParams();
   const params = useParams();
   const isCompact =
@@ -24,15 +24,14 @@ const ViewProjectPage = () => {
     <ProjectContext.Provider value={{ slug, isCompact }}>
       <ResizablePanelGroup
         autoSaveId="main-panel"
-        direction={isPortrait ? "vertical" : "horizontal"}
+        direction={{ sm: "vertical", md: "horizontal" }}
         className={cn("w-full !h-dvh bg-slate-600", !isCompact ? "md:p-4" : "")}
       >
         <ResizablePanel
-          panelId={0}
-          defaultSize={isPortrait ? 50 : 60}
+          defaultSize={60}
           collapsible
           collapsedSize={0}
-          minSize={isPortrait ? 10 : 30}
+          minSize={30}
         >
           <Editor />
         </ResizablePanel>
@@ -45,8 +44,7 @@ const ViewProjectPage = () => {
           }
         />
         <ResizablePanel
-          panelId={1}
-          defaultSize={isPortrait ? 50 : 40}
+          defaultSize={40}
           collapsible
           collapsedSize={0}
           minSize={10}
@@ -58,4 +56,12 @@ const ViewProjectPage = () => {
   );
 };
 
-export default ViewProjectPage;
+const LoadingPage = () => {
+  return (
+    <div className="flex w-full h-dvh items-center justify-center">
+      <Spinner />
+    </div>
+  );
+};
+
+export default withClientOnly(ViewProjectPage, LoadingPage);

@@ -20,12 +20,14 @@ import { FaCompress, FaCompressArrowsAlt } from "react-icons/fa";
 import ConsoleLogger from "./console-logger";
 import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
+import { useBreakpoint } from "~/hooks/useBreakpoint";
 
 const Editor = () => {
   const { pinnedFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
   const project = useProjectContext();
   const sidebarPanel = useRef<ImperativePanelHandle>(null);
+  const [breakpoint] = useBreakpoint();
 
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [curTabIdx, setCurTabIdx] = useState(0);
@@ -168,8 +170,7 @@ const Editor = () => {
         <ResizablePanelGroup autoSaveId="veditor-panel" direction="horizontal">
           <ResizablePanel
             ref={sidebarPanel}
-            panelId={0}
-            defaultSize={25}
+            defaultSize={{ sm: 0, md: 25 }}
             minSize={10}
             collapsible
             collapsedSize={0}
@@ -182,9 +183,9 @@ const Editor = () => {
 
           <ResizableHandle className="bg-slate-900" />
 
-          <ResizablePanel panelId={1} defaultSize={75}>
+          <ResizablePanel defaultSize={{ sm: 100, md: 75 }}>
             <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
-              <ResizablePanel panelId={0} defaultSize={80} minSize={20}>
+              <ResizablePanel defaultSize={{ sm: 100, md: 80 }} minSize={20}>
                 <Tabs
                   tabs={openFileList}
                   current={curTabIdx}
@@ -193,16 +194,20 @@ const Editor = () => {
                 />
               </ResizablePanel>
 
-              <ResizableHandle />
-              <ResizablePanel
-                panelId={1}
-                defaultSize={20}
-                collapsible
-                collapsedSize={0}
-                minSize={10}
-              >
-                <ConsoleLogger />
-              </ResizablePanel>
+              {breakpoint >= 2 ? (
+                <>
+                  <ResizableHandle />
+
+                  <ResizablePanel
+                    defaultSize={{ sm: 0, md: 20 }}
+                    collapsible
+                    collapsedSize={0}
+                    minSize={10}
+                  >
+                    <ConsoleLogger />
+                  </ResizablePanel>
+                </>
+              ) : null}
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>

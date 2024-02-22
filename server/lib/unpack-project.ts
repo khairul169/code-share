@@ -23,6 +23,7 @@ export const unpackProject = async (
 
   const projectDir = getProjectDir();
   if (!fileExists(projectDir)) {
+    console.log("not exist", projectDir);
     await fs.mkdir(projectDir, { recursive: true });
   }
 

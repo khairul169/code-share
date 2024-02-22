@@ -4,6 +4,7 @@ import Link from "~/renderer/link";
 
 const HomePage = () => {
   const { posts } = useData<Data>();
+
   if (!posts?.length) {
     return <p>No posts.</p>;
   }

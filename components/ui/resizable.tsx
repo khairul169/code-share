@@ -1,73 +1,51 @@
 import { GripVertical } from "lucide-react";
-import { createContext, forwardRef, useContext } from "react";
+import { forwardRef } from "react";
 import * as ResizablePrimitive from "react-resizable-panels";
-import cookieJs from "cookiejs";
 
 import { cn } from "~/lib/utils";
-import { usePageContext } from "~/renderer/context";
-import { useDebounce } from "~/hooks/useDebounce";
+import {
+  BreakpointValues,
+  useBreakpointValue,
+} from "~/hooks/useBreakpointValue";
 
-const ResizableContext = createContext<{ initialSize: number[] }>(null!);
+type Direction = "horizontal" | "vertical";
+
+type ResizablePanelGroupProps = Omit<
+  React.ComponentProps<typeof ResizablePrimitive.PanelGroup>,
+  "direction"
+> & {
+  direction: Direction | BreakpointValues<Direction>;
+};
 
 const ResizablePanelGroup = ({
   className,
-  autoSaveId,
   direction,
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) => {
-  const { cookies } = usePageContext();
-  const [debouncePersistLayout] = useDebounce((sizes: number[]) => {
-    if (autoSaveId && typeof window !== "undefined") {
-      cookieJs.set(panelKey, JSON.stringify(sizes));
-    }
-  }, 500);
-
-  const panelKey = ["panel", direction, autoSaveId].join(":");
-  let initialSize: number[] = [];
-
-  if (autoSaveId && cookies && cookies[panelKey]) {
-    initialSize = JSON.parse(cookies[panelKey]) || [];
-  }
-
-  const onLayout = (sizes: number[]) => {
-    if (props.onLayout) {
-      props.onLayout(sizes);
-    }
-    debouncePersistLayout(sizes);
-  };
+}: ResizablePanelGroupProps) => {
+  const directionValue = useBreakpointValue(direction);
 
   return (
-    <ResizableContext.Provider value={{ initialSize }}>
-      <ResizablePrimitive.PanelGroup
-        className={cn(
-          "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-          className
-        )}
-        {...props}
-        direction={direction}
-        onLayout={onLayout}
-      />
-    </ResizableContext.Provider>
+    <ResizablePrimitive.PanelGroup
+      className={cn(
+        "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
+        className
+      )}
+      direction={directionValue}
+      {...props}
+    />
   );
 };
 
-type ResizablePanelProps = React.ComponentProps<
-  typeof ResizablePrimitive.Panel
+type ResizablePanelProps = Omit<
+  React.ComponentProps<typeof ResizablePrimitive.Panel>,
+  "defaultSize"
 > & {
-  panelId: number;
+  defaultSize: number | BreakpointValues<number>;
 };
 
 const ResizablePanel = forwardRef((props: ResizablePanelProps, ref: any) => {
-  const { panelId, defaultSize, ...restProps } = props;
-  const ctx = useContext(ResizableContext);
-  let initialSize = defaultSize;
-
-  if (panelId != null) {
-    const size = ctx?.initialSize[panelId];
-    if (size != null) {
-      initialSize = size;
-    }
-  }
+  const { defaultSize, ...restProps } = props;
+  const initialSize = useBreakpointValue(defaultSize);
 
   return (
     <ResizablePrimitive.Panel

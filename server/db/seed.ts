@@ -66,22 +66,22 @@ const main = async () => {
         path: "index.html",
         filename: "index.html",
         content: `<!doctype html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-      />
-      <title>React + Tailwind Template</title>
-      <link rel="stylesheet" href="globals.css" />
-    </head>
-    <body>
-      <div id="app"></div>
-      <script src="index.jsx" type="module" defer></script>
-    </body>
-  </html>
-  `,
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>React + Tailwind Template</title>
+    <link rel="stylesheet" href="globals.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="index.jsx" type="module" defer></script>
+  </body>
+</html>
+`,
       },
       {
         userId: adminUser.id,

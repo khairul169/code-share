@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 type ClientOnlyProps = {
   children: ReactNode;
-  fallback?: ReactNode | null;
+  fallback?: () => JSX.Element | null;
 };
 
 const ClientOnly = ({ children, fallback }: ClientOnlyProps) => {
@@ -14,15 +14,19 @@ const ClientOnly = ({ children, fallback }: ClientOnlyProps) => {
   }, []);
 
   if (typeof window === "undefined") {
-    return fallback;
+    return fallback ? fallback() : null;
   }
 
-  return isMounted ? children : fallback;
+  if (isMounted) {
+    return children;
+  }
+
+  return fallback ? fallback() : null;
 };
 
 export const withClientOnly = <T extends unknown>(
   Component: React.ComponentType<T>,
-  fallback?: ReactNode | null
+  fallback?: () => JSX.Element | null
 ): React.ComponentType<T> => {
   return (props: any) => (
     <ClientOnly fallback={fallback}>
