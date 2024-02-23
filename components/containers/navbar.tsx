@@ -12,9 +12,10 @@ import {
 } from "../ui/dropdown-menu";
 import { FaChevronDown } from "react-icons/fa";
 import trpc from "~/lib/trpc";
+import { usePageContext } from "~/renderer/context";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const {user, urlPathname } = usePageContext();
   const logout = trpc.auth.logout.useMutation({
     onSuccess() {
       window.location.reload();
@@ -51,7 +52,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button>Log in</Button>
+              <Button href={"/auth/login?return=" + urlPathname}>Log in</Button>
             )}
           </div>
         </div>

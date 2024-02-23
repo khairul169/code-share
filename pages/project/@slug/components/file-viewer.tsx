@@ -4,22 +4,28 @@ import trpc from "~/lib/trpc";
 import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
 import Spinner from "~/components/ui/spinner";
+import { previewStore } from "../stores/web-preview";
 
 type Props = {
   id: number;
-  onFileContentChange?: () => void;
 };
 
-const FileViewer = ({ id, onFileContentChange }: Props) => {
+const FileViewer = ({ id }: Props) => {
   const { pinnedFiles } = useData<Data>();
   const initialData = pinnedFiles.find((i) => i.id === id);
 
   const { data, isLoading, refetch } = trpc.file.getById.useQuery(id, {
     initialData,
   });
+
+  const onFileContentChange = () => {
+    // refresh preview
+    previewStore.getState().refresh();
+  };
+
   const updateFileContent = trpc.file.update.useMutation({
     onSuccess: () => {
-      if (onFileContentChange) onFileContentChange();
+      onFileContentChange();
       refetch();
     },
   });

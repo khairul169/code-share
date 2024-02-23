@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -10,26 +10,21 @@ import trpc from "~/lib/trpc";
 import EditorContext from "../context/editor";
 import type { FileSchema } from "~/server/db/schema/file";
 import Panel from "~/components/ui/panel";
-import { previewStore } from "../stores/web-preview";
 import { useProjectContext } from "../context/project";
-import { ImperativePanelHandle } from "react-resizable-panels";
 import Sidebar from "./sidebar";
-import useCommandKey from "~/hooks/useCommandKey";
-import { Button } from "~/components/ui/button";
-import { FaCompress, FaCompressArrowsAlt } from "react-icons/fa";
 import ConsoleLogger from "./console-logger";
 import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
 import { useBreakpoint } from "~/hooks/useBreakpoint";
+import StatusBar from "./status-bar";
+import { FiTerminal } from "react-icons/fi";
 
 const Editor = () => {
   const { project, pinnedFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
   const projectCtx = useProjectContext();
-  const sidebarPanel = useRef<ImperativePanelHandle>(null);
   const [breakpoint] = useBreakpoint();
 
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [curTabIdx, setCurTabIdx] = useState(0);
   const [curOpenFiles, setOpenFiles] = useState<number[]>(
     pinnedFiles.map((i) => i.id)
@@ -52,22 +47,6 @@ const Editor = () => {
       }
     },
   });
-
-  const toggleSidebar = useCallback(() => {
-    const sidebar = sidebarPanel.current;
-    if (!sidebar) {
-      return;
-    }
-
-    if (sidebar.isExpanded()) {
-      sidebar.collapse();
-    } else {
-      sidebar.expand();
-      sidebar.resize(25);
-    }
-  }, [sidebarPanel]);
-
-  useCommandKey("b", toggleSidebar);
 
   useEffect(() => {
     if (!pinnedFiles?.length || curOpenFiles.length > 0) {
@@ -139,22 +118,33 @@ const Editor = () => {
     [openedFilesData]
   );
 
-  const refreshPreview = useCallback(() => {
-    previewStore.getState().refresh();
-  }, []);
+  const tabs = useMemo(() => {
+    let tabs: Tab[] = [];
 
-  const openFileList = useMemo(() => {
-    return curOpenFiles.map((fileId) => {
-      const fileData = openedFiles?.find((i) => i.id === fileId);
+    // opened files
+    tabs = tabs.concat(
+      curOpenFiles.map((fileId) => {
+        const fileData = openedFiles?.find((i) => i.id === fileId);
 
-      return {
-        title: fileData?.filename || "...",
-        render: () => (
-          <FileViewer id={fileId} onFileContentChange={refreshPreview} />
-        ),
-      };
-    }) satisfies Tab[];
-  }, [curOpenFiles, openedFiles, refreshPreview]);
+        return {
+          title: fileData?.filename || "...",
+          render: () => <FileViewer id={fileId} />,
+        };
+      })
+    );
+
+    // show console tab on mobile
+    if (breakpoint < 2) {
+      tabs.push({
+        title: "Console",
+        icon: <FiTerminal />,
+        render: () => <ConsoleLogger />,
+        locked: true,
+      });
+    }
+
+    return tabs;
+  }, [curOpenFiles, openedFiles, breakpoint]);
 
   const PanelComponent = !projectCtx.isCompact ? Panel : "div";
 
@@ -166,20 +156,19 @@ const Editor = () => {
         onDeleteFile,
       }}
     >
-      <PanelComponent className="h-full relative">
-        <ResizablePanelGroup autoSaveId="veditor-panel" direction="horizontal">
-          <ResizablePanel
-            ref={sidebarPanel}
-            defaultSize={{ sm: 0, md: 25 }}
+      <PanelComponent className="h-full relative flex flex-col">
+        <ResizablePanelGroup
+          autoSaveId="veditor-panel"
+          direction="horizontal"
+          className="flex-1 order-2 md:order-1"
+        >
+          <Sidebar
+            defaultSize={{ sm: 50, md: 25 }}
+            defaultCollapsed={{ sm: true, md: false }}
             minSize={10}
             collapsible
             collapsedSize={0}
-            className="bg-[#1e2536]"
-            onExpand={() => setSidebarExpanded(true)}
-            onCollapse={() => setSidebarExpanded(false)}
-          >
-            <Sidebar />
-          </ResizablePanel>
+          />
 
           <ResizableHandle className="bg-slate-900" />
 
@@ -187,8 +176,8 @@ const Editor = () => {
             <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
               <ResizablePanel defaultSize={{ sm: 100, md: 80 }} minSize={20}>
                 <Tabs
-                  tabs={openFileList}
-                  current={curTabIdx}
+                  tabs={tabs}
+                  current={Math.min(Math.max(curTabIdx, 0), tabs.length - 1)}
                   onChange={setCurTabIdx}
                   onClose={onCloseFile}
                 />
@@ -212,13 +201,7 @@ const Editor = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        <Button
-          variant="ghost"
-          className="absolute bottom-0 left-0 w-12 h-12 rounded-none flex items-center justify-center"
-          onClick={toggleSidebar}
-        >
-          {sidebarExpanded ? <FaCompressArrowsAlt /> : <FaCompress />}
-        </Button>
+        <StatusBar className="order-1 md:order-2" />
       </PanelComponent>
     </EditorContext.Provider>
   );

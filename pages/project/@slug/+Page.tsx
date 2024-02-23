@@ -38,18 +38,17 @@ const ViewProjectPage = () => {
           withHandle
           className={
             !isCompact
-              ? "bg-slate-800 md:bg-transparent hover:bg-slate-500 transition-colors md:mx-1 w-2 md:data-[panel-group-direction=vertical]:h-2 rounded-lg"
+              ? "bg-slate-800 md:bg-transparent hover:bg-slate-500 transition-colors md:mx-1 w-2 md:data-[panel-group-direction=vertical]:h-2 md:rounded-lg"
               : "bg-slate-800"
           }
         />
-        <ResizablePanel
+        <WebPreview
           defaultSize={40}
           collapsible
           collapsedSize={0}
           minSize={10}
-        >
-          <WebPreview url={previewUrl} />
-        </ResizablePanel>
+          url={previewUrl}
+        />
       </ResizablePanelGroup>
     </ProjectContext.Provider>
   );

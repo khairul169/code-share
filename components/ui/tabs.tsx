@@ -8,6 +8,7 @@ export type Tab = {
   title: string;
   icon?: React.ReactNode;
   render?: () => React.ReactNode;
+  locked?: boolean;
 };
 
 type Props = {
@@ -76,7 +77,7 @@ const Tabs = ({ tabs, current = 0, onChange, onClose }: Props) => {
               icon={tab.icon}
               isActive={idx === current}
               onSelect={() => onChange && onChange(idx)}
-              onClose={() => onClose && onClose(idx)}
+              onClose={!tab.locked ? () => onClose && onClose(idx) : null}
             />
           ))}
         </nav>
@@ -93,12 +94,13 @@ type TabItemProps = {
   icon?: React.ReactNode;
   isActive?: boolean;
   onSelect: () => void;
-  onClose: () => void;
+  onClose?: (() => void) | null;
 };
 
 const TabItem = ({
   index,
   title,
+  icon,
   isActive,
   onSelect,
   onClose,
@@ -116,19 +118,28 @@ const TabItem = ({
       )}
       onClick={onSelect}
     >
-      <button className="pl-4 pr-0 truncate flex items-center self-stretch">
-        <FileIcon
-          file={{ isDirectory: false, filename: title }}
-          className="mr-1"
-        />
-        <span className="truncate">{filename}</span>
+      <button
+        className={cn(
+          "pl-4 pr-4 truncate flex items-center self-stretch",
+          onClose ? "pr-0" : ""
+        )}
+      >
+        {icon != null ? (
+          icon
+        ) : (
+          <FileIcon file={{ isDirectory: false, filename: title }} />
+        )}
+        <span className="inline-block ml-2 truncate">{filename}</span>
         <span>{ext}</span>
       </button>
-      <ActionButton
-        icon={FiX}
-        className="opacity-0 group-hover:opacity-100 transition-colors"
-        onClick={onClose}
-      />
+
+      {onClose ? (
+        <ActionButton
+          icon={FiX}
+          className="opacity-0 group-hover:opacity-100 transition-colors"
+          onClick={() => onClose()}
+        />
+      ) : null}
     </div>
   );
 };

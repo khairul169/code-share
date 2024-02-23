@@ -41,16 +41,18 @@ type ResizablePanelProps = Omit<
   "defaultSize"
 > & {
   defaultSize: number | BreakpointValues<number>;
+  defaultCollapsed?: boolean | BreakpointValues<boolean>;
 };
 
 const ResizablePanel = forwardRef((props: ResizablePanelProps, ref: any) => {
-  const { defaultSize, ...restProps } = props;
+  const { defaultSize, defaultCollapsed, ...restProps } = props;
   const initialSize = useBreakpointValue(defaultSize);
+  const initialCollapsed = useBreakpointValue(defaultCollapsed);
 
   return (
     <ResizablePrimitive.Panel
       ref={ref}
-      defaultSize={initialSize}
+      defaultSize={initialCollapsed ? 0 : initialSize}
       {...restProps}
     />
   );

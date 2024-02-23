@@ -1,31 +1,9 @@
-import { useEffect, useState } from "react";
-import { Console, Decode } from "console-feed";
-import type { Message } from "console-feed/lib/definitions/Console";
+import { Console } from "console-feed";
 import ErrorBoundary from "~/components/containers/error-boundary";
+import { useConsoleLogs } from "~/hooks/useConsoleLogger";
 
 const ConsoleLogger = () => {
-  const [logs, setLogs] = useState<any[]>([]);
-
-  useEffect(() => {
-    const onMessage = (event: MessageEvent<any>) => {
-      const { data: eventData } = event;
-      if (!eventData || eventData.type !== "console") {
-        return;
-      }
-
-      const data = Decode(eventData.data);
-      if (!data || !data.method || !data.data) {
-        return;
-      }
-
-      setLogs((i) => [data, ...i]);
-    };
-
-    window.addEventListener("message", onMessage);
-    return () => {
-      window.removeEventListener("message", onMessage);
-    };
-  }, []);
+  const logs = useConsoleLogs();
 
   return (
     <div className="h-full flex flex-col bg-[#242424] border-t border-t-gray-600">
