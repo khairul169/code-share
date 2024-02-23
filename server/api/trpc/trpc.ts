@@ -5,7 +5,7 @@ import { PageContext } from "vike/types";
 
 const trpcServer = async (ctx: PageContext) => {
   const createCaller = createCallerFactory(appRouter);
-  const context = await createContext({ req: ctx.req });
+  const context = await createContext(ctx);
   return createCaller(context);
 };
 

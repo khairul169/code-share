@@ -17,4 +17,5 @@ export const user = sqliteTable("users", {
 export const insertUserSchema = createInsertSchema(user);
 export const selectUserSchema = createSelectSchema(user);
 
-export type UserSchema = z.infer<typeof selectUserSchema>;
+export type UserWithPassword = z.infer<typeof selectUserSchema>;
+export type UserSchema = Omit<UserWithPassword, "password">;

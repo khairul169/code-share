@@ -1,4 +1,5 @@
-import type { Request } from "express";
+import type { Request, Response } from "express";
+import type { UserSchema } from "~/server/db/schema/user";
 
 declare global {
   namespace Vike {
@@ -11,10 +12,14 @@ declare global {
       config: {
         title?: string;
         description?: string;
+        Layout?: (props: { children: React.ReactNode }) => React.ReactElement;
       };
       abortReason?: string;
+
       req: Request;
+      res: Response;
       cookies: Record<string, string>;
+      user?: UserSchema | null;
     }
   }
 }

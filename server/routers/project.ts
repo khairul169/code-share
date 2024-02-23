@@ -9,6 +9,11 @@ import {
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { uid } from "../lib/utils";
+import { insertUserSchema, user } from "../db/schema/user";
+import { faker } from "@faker-js/faker";
+import { ucwords } from "~/lib/utils";
+import { hashPassword } from "../lib/crypto";
+import { createToken } from "../lib/jwt";
 
 const projectRouter = router({
   getAll: procedure.query(async () => {
@@ -45,19 +50,59 @@ const projectRouter = router({
 
   create: procedure
     .input(
-      insertProjectSchema.pick({
-        title: true,
-      })
+      insertProjectSchema
+        .pick({
+          title: true,
+        })
+        .merge(
+          z.object({
+            forkFromId: z.number().optional(),
+            user: insertUserSchema
+              .pick({
+                name: true,
+                email: true,
+                password: true,
+              })
+              .optional(),
+          })
+        )
     )
-    .mutation(async ({ input }) => {
-      const data: z.infer<typeof insertProjectSchema> = {
-        userId: 1,
-        title: input.title,
-        slug: uid(),
-      };
+    .mutation(async ({ ctx, input }) => {
+      const title =
+        input.title.length > 0 ? input.title : ucwords(faker.lorem.words(2));
+      let userId = 0;
 
-      const [result] = await db.insert(project).values(data).returning();
-      return result;
+      return db.transaction(async (tx) => {
+        if (input.user) {
+          const [usr] = await tx
+            .insert(user)
+            .values({
+              ...input.user,
+              password: await hashPassword(input.user.password),
+            })
+            .returning();
+
+          userId = usr.id;
+
+          // set user token
+          const token = await createToken({ id: userId });
+          ctx.res.cookie("auth-token", token, { httpOnly: true });
+        }
+
+        if (!userId) {
+          throw new Error("Invalid userId!");
+        }
+
+        const data: z.infer<typeof insertProjectSchema> = {
+          userId,
+          title,
+          slug: uid(),
+        };
+
+        const [result] = await tx.insert(project).values(data).returning();
+
+        return result;
+      });
     }),
 
   update: procedure
@@ -94,6 +139,23 @@ const projectRouter = router({
       .returning();
 
     return result;
+  }),
+
+  getTemplates: procedure.query(() => {
+    return [
+      {
+        title: "Empty Project",
+        projectId: 0,
+      },
+      {
+        title: "Vanilla HTML+CSS+JS",
+        projectId: 1,
+      },
+      {
+        title: "React + Tailwindcss",
+        projectId: 2,
+      },
+    ];
   }),
 });
 

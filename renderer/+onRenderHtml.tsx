@@ -2,7 +2,7 @@ import ReactDOMServer from "react-dom/server";
 import { escapeInject, dangerouslySkipEscape } from "vike/server";
 import type { OnRenderHtmlAsync } from "vike/types";
 import { getPageMetadata } from "./utils";
-import Layout from "./layout";
+import App from "./app";
 
 export const onRenderHtml: OnRenderHtmlAsync = async (
   pageContext
@@ -15,9 +15,9 @@ export const onRenderHtml: OnRenderHtmlAsync = async (
     );
 
   const page = ReactDOMServer.renderToString(
-    <Layout pageContext={pageContext}>
+    <App pageContext={pageContext}>
       <Page />
-    </Layout>
+    </App>
   );
 
   // See https://vike.dev/head

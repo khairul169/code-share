@@ -20,3 +20,7 @@ export const useForm = <T extends FieldValues>(
 
   return form;
 };
+
+export type useFormReturn<T extends FieldValues> = ReturnType<
+  typeof useForm<T>
+>;

@@ -5,19 +5,23 @@ import Providers from "./providers";
 import "./globals.css";
 import "nprogress/nprogress.css";
 
-type LayoutProps = {
+type AppProps = {
   children: React.ReactNode;
   pageContext: PageContext;
 };
 
-const Layout = ({ children, pageContext }: LayoutProps) => {
+const App = ({ children, pageContext }: AppProps) => {
+  const { Layout } = pageContext.config;
+
   return (
     <React.StrictMode>
       <PageContextProvider pageContext={pageContext}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {Layout ? <Layout children={children} /> : children}
+        </Providers>
       </PageContextProvider>
     </React.StrictMode>
   );
 };
 
-export default Layout;
+export default App;

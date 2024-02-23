@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom/client";
 import { getPageMetadata } from "./utils";
 import type { OnRenderClientAsync } from "vike/types";
-import Layout from "./layout";
+import Layout from "./app";
 
 let root: ReactDOM.Root;
 

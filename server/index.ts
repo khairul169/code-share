@@ -1,8 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import { renderPage } from "vike/server";
 import { IS_DEV } from "./lib/consts";
 import cookieParser from "cookie-parser";
 import api from "./api";
+import { authMiddleware } from "./middlewares/auth";
 
 async function createServer() {
   const app = express();
@@ -24,12 +26,13 @@ async function createServer() {
   }
 
   app.use(cookieParser());
+  app.use(authMiddleware);
 
   app.use("/api", api);
 
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
-    const pageContext = { req, cookies: req.cookies };
+    const pageContext = { req, res, cookies: req.cookies, user: req.user };
     const ctx = await renderPage({ urlOriginal: url, ...pageContext });
 
     const { httpResponse } = ctx;

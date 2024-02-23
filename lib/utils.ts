@@ -25,3 +25,11 @@ export function getPreviewUrl(
     typeof file === "string" ? file : file.path
   );
 }
+
+export const ucfirst = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+};
+
+export const ucwords = (str: string) => {
+  return str.split(" ").map(ucfirst).join(" ");
+};

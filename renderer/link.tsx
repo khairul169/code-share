@@ -1,19 +1,23 @@
-import { ComponentProps } from "react";
+import React from "react";
 import { usePageContext } from "./context";
+import { Slot } from "@radix-ui/react-slot";
 
-const Link = (props: ComponentProps<"a">) => {
+type LinkProps = {
+  href?: string;
+  className?: string;
+  asChild?: boolean;
+  children?: React.ReactNode;
+};
+
+const Link = ({ asChild, href, ...props }: LinkProps) => {
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
-  const { href } = props;
+  const Comp = asChild ? Slot : "a";
 
   const isActive =
     href === "/" ? urlPathname === href : urlPathname.startsWith(href!);
 
-  const className = [props.className, isActive && "is-active"]
-    .filter(Boolean)
-    .join(" ");
-
-  return <a {...props} className={className} />;
+  return <Comp data-active={isActive || undefined} href={href} {...props} />;
 };
 
 export default Link;

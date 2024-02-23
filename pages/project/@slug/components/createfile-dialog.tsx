@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "../../../../components/ui/dialog";
 import { UseDiscloseReturn } from "~/hooks/useDisclose";
-import { Input } from "../../../../components/ui/input";
+import { BaseInput } from "../../../../components/ui/input";
 import { Button } from "../../../../components/ui/button";
 import { useForm } from "~/hooks/useForm";
 import { z } from "zod";
@@ -76,7 +76,7 @@ const CreateFileDialog = ({ disclose, onSuccess }: Props) => {
         <form onSubmit={onSubmit}>
           <FormErrorMessage form={form} />
 
-          <Input
+          <BaseInput
             placeholder={isDir ? "Directory Name" : "Filename"}
             autoFocus
             {...form.register("filename")}

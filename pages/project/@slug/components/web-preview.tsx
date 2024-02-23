@@ -3,8 +3,7 @@ import Panel from "~/components/ui/panel";
 import { useCallback, useEffect, useRef } from "react";
 import { useProjectContext } from "../context/project";
 import { Button } from "~/components/ui/button";
-import { FaEllipsisV, FaRedo } from "react-icons/fa";
-import { Input } from "~/components/ui/input";
+import { FaRedo } from "react-icons/fa";
 import { previewStore } from "../stores/web-preview";
 
 type WebPreviewProps = {
