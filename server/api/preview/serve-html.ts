@@ -29,11 +29,11 @@ export const serveHtml = async (
   const injectScripts = ['<script src="/js/hook-console.js"></script>'];
 
   // prevent direct access
-  if (!IS_DEV) {
-    injectScripts.push(
-      `<script>if (window === window.parent) {window.location.href = '/';}</script>`
-    );
-  }
+  // if (!IS_DEV) {
+  //   injectScripts.push(
+  //     `<script>if (window === window.parent) {window.location.href = '/';}</script>`
+  //   );
+  // }
 
   // js import maps
   const importMaps = settings?.js?.packages || [];
