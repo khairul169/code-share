@@ -11,8 +11,8 @@ type Props = {
 };
 
 const FileViewer = ({ id }: Props) => {
-  const { pinnedFiles } = useData<Data>();
-  const initialData = pinnedFiles.find((i) => i.id === id);
+  const { initialFiles } = useData<Data>();
+  const initialData = initialFiles.find((i) => i.id === id);
 
   const { data, isLoading, refetch } = trpc.file.getById.useQuery(id, {
     initialData,

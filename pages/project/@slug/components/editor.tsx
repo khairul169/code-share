@@ -20,21 +20,21 @@ import StatusBar from "./status-bar";
 import { FiTerminal } from "react-icons/fi";
 
 const Editor = () => {
-  const { project, pinnedFiles } = useData<Data>();
+  const { project, initialFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
   const projectCtx = useProjectContext();
   const [breakpoint] = useBreakpoint();
 
   const [curTabIdx, setCurTabIdx] = useState(0);
   const [curOpenFiles, setOpenFiles] = useState<number[]>(
-    pinnedFiles.map((i) => i.id)
+    initialFiles.map((i) => i.id)
   );
 
   const openedFilesData = trpc.file.getAll.useQuery(
     { projectId: project.id, id: curOpenFiles },
-    { enabled: curOpenFiles.length > 0, initialData: pinnedFiles }
+    { enabled: curOpenFiles.length > 0, initialData: initialFiles }
   );
-  const [openedFiles, setOpenedFiles] = useState<any[]>(pinnedFiles);
+  const [openedFiles, setOpenedFiles] = useState<any[]>(initialFiles);
 
   const deleteFile = trpc.file.delete.useMutation({
     onSuccess: (file) => {
@@ -49,11 +49,11 @@ const Editor = () => {
   });
 
   useEffect(() => {
-    if (!pinnedFiles?.length || curOpenFiles.length > 0) {
+    if (!initialFiles?.length || curOpenFiles.length > 0) {
       return;
     }
 
-    pinnedFiles.forEach((file) => {
+    initialFiles.forEach((file) => {
       onOpenFile(file.id, false);
     });
 
@@ -61,7 +61,7 @@ const Editor = () => {
       setOpenFiles([]);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pinnedFiles]);
+  }, [initialFiles]);
 
   useEffect(() => {
     if (openedFilesData.data) {
@@ -170,7 +170,7 @@ const Editor = () => {
             collapsedSize={0}
           />
 
-          <ResizableHandle className="bg-slate-900" />
+          <ResizableHandle className="w-0" />
 
           <ResizablePanel defaultSize={{ sm: 100, md: 75 }}>
             <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
@@ -185,7 +185,7 @@ const Editor = () => {
 
               {breakpoint >= 2 ? (
                 <>
-                  <ResizableHandle />
+                  <ResizableHandle className="!h-0" />
 
                   <ResizablePanel
                     defaultSize={{ sm: 0, md: 20 }}

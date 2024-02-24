@@ -1,14 +1,27 @@
 import React, { useState } from "react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import trpc, { getBaseUrl } from "~/lib/trpc";
+import { toast } from "~/lib/utils";
 import { httpBatchLink } from "@trpc/react-query";
+import { Toaster } from "~/components/ui/sonner";
 
 type Props = {
   children: React.ReactNode;
 };
 
 const Providers = ({ children }: Props) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          mutations: {
+            onError(err) {
+              toast.error(err.message);
+            },
+          },
+        },
+      })
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -24,7 +37,10 @@ const Providers = ({ children }: Props) => {
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster />
+      </QueryClientProvider>
     </trpc.Provider>
   );
 };

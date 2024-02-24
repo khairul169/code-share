@@ -1,5 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import copyToClipboard from "copy-to-clipboard";
+import { toast } from "sonner";
 import { BASE_URL } from "./consts";
 import type { ProjectSchema } from "~/server/db/schema/project";
 import type { FileSchema } from "~/server/db/schema/file";
@@ -33,3 +35,14 @@ export const ucfirst = (str: string) => {
 export const ucwords = (str: string) => {
   return str.split(" ").map(ucfirst).join(" ");
 };
+
+export const copy = (text: string) => {
+  copyToClipboard(text, {
+    onCopy: (data) => {
+      toast.success("Copied to clipboard!");
+      return data;
+    },
+  });
+};
+
+export { toast };

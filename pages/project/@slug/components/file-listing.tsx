@@ -19,9 +19,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
-import { cn, getPreviewUrl } from "~/lib/utils";
+import { cn, getPreviewUrl, getUrl, copy } from "~/lib/utils";
 import FileIcon from "~/components/ui/file-icon";
-import copy from "copy-to-clipboard";
 import { useData } from "~/renderer/hooks";
 import Spinner from "~/components/ui/spinner";
 import { Data } from "../+data";
@@ -197,6 +196,13 @@ const FileItem = ({ file, createFileDlg }: FileItemProps) => {
                 Open in new tab
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  copy(getUrl(project.slug + `?files=${file.path}`))
+                }
+              >
+                Share
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
                   return updateFile.mutate({

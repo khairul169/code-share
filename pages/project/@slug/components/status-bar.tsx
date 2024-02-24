@@ -1,5 +1,5 @@
 import React from "react";
-import { FiSidebar, FiSmartphone, FiUser } from "react-icons/fi";
+import { FiArrowLeft, FiSidebar, FiSmartphone, FiUser } from "react-icons/fi";
 import { useStore } from "zustand";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -22,24 +22,30 @@ const StatusBar = ({ className }: React.ComponentProps<"div">) => {
   return (
     <div
       className={cn(
-        "h-10 flex items-center gap-1 pl-2 pr-3 w-full bg-slate-900 md:bg-[#242424] border-b md:border-b-0 md:border-t border-slate-900 md:border-black/30",
+        "h-10 flex items-center gap-1 pl-2 pr-3 w-full bg-slate-800 md:bg-[#242424] md:border-t border-slate-900 md:border-black/30",
         className
       )}
     >
       <ActionButton
-        title="Toggle Sidebar"
+        title="Toggle Sidebar (CTRL+B)"
         icon={FiSidebar}
         className={sidebarExpanded ? "text-white" : ""}
         onClick={() => sidebarStore.getState().toggle()}
       />
       <ActionButton
-        title="Toggle Preview Window"
+        title="Toggle Preview Window (CTRL+P)"
         icon={FiSmartphone}
         className={previewExpanded ? "text-white" : ""}
         onClick={() => previewStore.getState().toggle()}
       />
 
       <div className="flex-1"></div>
+      <ActionButton
+        title="Return to Home"
+        href="/"
+        icon={FiArrowLeft}
+        size="lg"
+      />
       <Button
         href={user ? "/user" : "/auth/login?return=" + urlPathname}
         className="h-full p-0 gap-2 text-xs"

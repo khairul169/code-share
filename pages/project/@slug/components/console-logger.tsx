@@ -6,7 +6,7 @@ const ConsoleLogger = () => {
   const logs = useConsoleLogs();
 
   return (
-    <div className="h-full flex flex-col bg-[#242424] border-t border-t-gray-600">
+    <div className="h-full flex flex-col bg-[#242424] border-t border-gray-700">
       <p className="py-2 px-3 uppercase text-xs">Console</p>
       <ErrorBoundary>
         <div className="overflow-y-auto flex-1">
