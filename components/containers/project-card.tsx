@@ -16,7 +16,11 @@ const ProjectCard = ({ project }: Props) => {
       href={`/${project.slug}`}
       className="border border-white/20 hover:border-white/40 rounded-lg transition-colors overflow-hidden"
     >
-      <div className="w-full aspect-[3/2] bg-gray-900"></div>
+      <img
+        src={`/api/thumbnail/${project.slug}`}
+        className="w-full aspect-[3/2] bg-background object-cover"
+      />
+
       <div className="py-2 px-3 flex items-center gap-3">
         <div className="size-8 rounded-full bg-white/80"></div>
         <div>

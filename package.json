@@ -76,6 +76,7 @@
     "nprogress": "^0.2.0",
     "postcss": "^8",
     "prettier": "^3.2.5",
+    "puppeteer": "^22.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
