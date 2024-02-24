@@ -2,7 +2,6 @@ import { cn } from "~/lib/utils";
 import React, { useEffect, useMemo, useRef } from "react";
 import ActionButton from "./action-button";
 import { FiX } from "react-icons/fi";
-import FileIcon from "./file-icon";
 
 export type Tab = {
   title: string;
@@ -16,9 +15,18 @@ type Props = {
   current?: number;
   onChange?: (idx: number) => void;
   onClose?: (idx: number) => void;
+  className?: string;
+  containerClassName?: string;
 };
 
-const Tabs = ({ tabs, current = 0, onChange, onClose }: Props) => {
+const Tabs = ({
+  tabs,
+  current = 0,
+  onChange,
+  onClose,
+  className,
+  containerClassName,
+}: Props) => {
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
   const onWheel = (e: WheelEvent) => {
@@ -63,7 +71,12 @@ const Tabs = ({ tabs, current = 0, onChange, onClose }: Props) => {
   }, [tabs, current]);
 
   return (
-    <div className="w-full h-full flex flex-col items-stretch bg-slate-800">
+    <div
+      className={cn(
+        "w-full flex flex-col items-stretch bg-slate-800",
+        className
+      )}
+    >
       {tabs.length > 0 ? (
         <nav
           ref={tabContainerRef}
@@ -77,13 +90,15 @@ const Tabs = ({ tabs, current = 0, onChange, onClose }: Props) => {
               icon={tab.icon}
               isActive={idx === current}
               onSelect={() => onChange && onChange(idx)}
-              onClose={!tab.locked ? () => onClose && onClose(idx) : null}
+              onClose={!tab.locked && onClose ? () => onClose(idx) : null}
             />
           ))}
         </nav>
       ) : null}
 
-      <main className="flex-1 overflow-hidden">{tabView}</main>
+      <main className={cn("flex-1 overflow-hidden", containerClassName)}>
+        {tabView}
+      </main>
     </div>
   );
 };
@@ -119,17 +134,16 @@ const TabItem = ({
       onClick={onSelect}
     >
       <button
+        type="button"
         className={cn(
           "pl-4 pr-4 truncate flex items-center self-stretch",
           onClose ? "pr-0" : ""
         )}
       >
-        {icon != null ? (
-          icon
-        ) : (
-          <FileIcon file={{ isDirectory: false, filename: title }} />
-        )}
-        <span className="inline-block ml-2 truncate">{filename}</span>
+        {icon}
+        <span className={cn("inline-block truncate", icon ? "ml-2" : "")}>
+          {filename}
+        </span>
         <span>{ext}</span>
       </button>
 

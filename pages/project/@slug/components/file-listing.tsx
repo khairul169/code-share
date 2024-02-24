@@ -24,6 +24,7 @@ import FileIcon from "~/components/ui/file-icon";
 import { useData } from "~/renderer/hooks";
 import Spinner from "~/components/ui/spinner";
 import { Data } from "../+data";
+import { settingsDialog } from "../stores/dialogs";
 
 const FileListing = () => {
   const { project, files: initialFiles } = useData<Data>();
@@ -59,7 +60,9 @@ const FileListing = () => {
           <DropdownMenuContent align="start">
             <DropdownMenuItem>Upload File</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Project Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => settingsDialog.setState(true)}>
+              Project Settings
+            </DropdownMenuItem>
             <DropdownMenuItem>Download Project</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -184,13 +187,18 @@ const FileItem = ({ file, createFileDlg }: FileItemProps) => {
                 Copy Path
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => copy(getPreviewUrl(project, file))}
+                onClick={() =>
+                  copy(getPreviewUrl(project, file, { raw: true }))
+                }
               >
                 Copy URL
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
-                  window.open(getPreviewUrl(project, file), "_blank")
+                  window.open(
+                    getPreviewUrl(project, file, { raw: true }),
+                    "_blank"
+                  )
                 }
               >
                 Open in new tab

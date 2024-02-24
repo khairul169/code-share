@@ -19,6 +19,7 @@ const get = async (req: Request, res: Response) => {
   if (!projectData) {
     return res.status(404).send("Project not found!");
   }
+  const settings = projectData.settings || {};
 
   const fileData = await db.query.file.findFirst({
     where: and(
@@ -34,16 +35,18 @@ const get = async (req: Request, res: Response) => {
   const ext = getFileExt(fileData.filename);
   let content = fileData.content || "";
 
-  if (["html", "htm"].includes(ext)) {
-    content = await serveHtml(fileData);
-  }
+  if (!req.query.raw) {
+    if (["html", "htm"].includes(ext)) {
+      content = await serveHtml(fileData, settings);
+    }
 
-  if (["js", "ts", "jsx", "tsx"].includes(ext)) {
-    content = await serveJs(fileData);
-  }
+    if (["js", "ts", "jsx", "tsx"].includes(ext)) {
+      content = await serveJs(fileData, settings.js);
+    }
 
-  if (["css"].includes(ext)) {
-    content = await postcss(fileData);
+    if (["css"].includes(ext) && settings.css?.preprocessor === "postcss") {
+      content = await postcss(fileData, settings.css);
+    }
   }
 
   res.setHeader("Content-Type", getMimeType(fileData.filename));

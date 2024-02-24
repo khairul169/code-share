@@ -14,21 +14,34 @@ import { faker } from "@faker-js/faker";
 import { ucwords } from "~/lib/utils";
 import { hashPassword } from "../lib/crypto";
 import { createToken } from "../lib/jwt";
+import { file } from "../db/schema/file";
 
 const projectRouter = router({
-  getAll: procedure.query(async () => {
-    const where = and(isNull(project.deletedAt));
+  getAll: procedure
+    .input(z.object({ owned: z.boolean() }).partial().optional())
+    .query(async ({ ctx, input: opt }) => {
+      if (opt?.owned && !ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
 
-    const projects = await db.query.project.findMany({
-      where,
-      with: {
-        user: { columns: { password: false } },
-      },
-      orderBy: [desc(project.id)],
-    });
+      const where = [
+        !opt?.owned
+          ? eq(project.visibility, "public")
+          : eq(project.userId, ctx.user!.id),
+        isNull(project.deletedAt),
+      ];
 
-    return projects;
-  }),
+      const projects = await db.query.project.findMany({
+        where: and(...(where.filter((i) => i != null) as any)),
+        columns: { settings: false },
+        with: {
+          user: { columns: { password: false } },
+        },
+        orderBy: [desc(project.id)],
+      });
+
+      return projects;
+    }),
 
   getById: procedure
     .input(z.number().or(z.string()))
@@ -70,10 +83,10 @@ const projectRouter = router({
     .mutation(async ({ ctx, input }) => {
       const title =
         input.title.length > 0 ? input.title : ucwords(faker.lorem.words(2));
-      let userId = 0;
+      let userId = ctx.user?.id;
 
       return db.transaction(async (tx) => {
-        if (input.user) {
+        if (input.user && !userId) {
           const [usr] = await tx
             .insert(user)
             .values({
@@ -99,15 +112,52 @@ const projectRouter = router({
           slug: uid(),
         };
 
-        const [result] = await tx.insert(project).values(data).returning();
+        const [projectData] = await tx.insert(project).values(data).returning();
+        const projectId = projectData.id;
 
-        return result;
+        if (input.forkFromId) {
+          const forkFiles = await tx.query.file.findMany({
+            where: and(
+              eq(file.projectId, input.forkFromId),
+              isNull(file.deletedAt)
+            ),
+            columns: {
+              id: false,
+              projectId: false,
+              createdAt: false,
+              deletedAt: false,
+            },
+          });
+
+          await tx
+            .insert(file)
+            .values(forkFiles.map((file) => ({ ...file, projectId })));
+        } else {
+          await tx.insert(file).values([
+            {
+              projectId,
+              path: "index.html",
+              filename: "index.html",
+              content: "<p>Open index.html to edit this file.</p>",
+              isPinned: true,
+            },
+          ]);
+        }
+
+        return projectData;
       });
     }),
 
   update: procedure
-    .input(selectProjectSchema.partial().required({ id: true }))
+    .input(
+      selectProjectSchema
+        .partial()
+        .omit({ slug: true, userId: true })
+        .required({ id: true })
+    )
     .mutation(async ({ input }) => {
+      const data = { ...input };
+
       const projectData = await db.query.project.findFirst({
         where: and(eq(project.id, input.id), isNull(project.deletedAt)),
       });
@@ -115,9 +165,16 @@ const projectRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      if (data.settings) {
+        data.settings = Object.assign(
+          projectData.settings || {},
+          data.settings
+        );
+      }
+
       const [result] = await db
         .update(project)
-        .set(input)
+        .set(data)
         .where(and(eq(project.id, input.id), isNull(project.deletedAt)))
         .returning();
 

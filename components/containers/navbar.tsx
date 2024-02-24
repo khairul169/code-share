@@ -15,7 +15,7 @@ import trpc from "~/lib/trpc";
 import { usePageContext } from "~/renderer/context";
 
 const Navbar = () => {
-  const {user, urlPathname } = usePageContext();
+  const { user, urlPathname } = usePageContext();
   const logout = trpc.auth.logout.useMutation({
     onSuccess() {
       window.location.reload();
@@ -46,6 +46,9 @@ const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/projects">My Projects</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => logout.mutate()}>
                     Logout
                   </DropdownMenuItem>

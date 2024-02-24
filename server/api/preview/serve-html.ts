@@ -2,8 +2,12 @@ import db from "~/server/db";
 import { FileSchema, file } from "~/server/db/schema/file";
 import { and, eq, isNull } from "drizzle-orm";
 import { IS_DEV } from "~/server/lib/consts";
+import type { ProjectSettingsSchema } from "~/server/db/schema/project";
 
-export const serveHtml = async (fileData: FileSchema) => {
+export const serveHtml = async (
+  fileData: FileSchema,
+  settings: Partial<ProjectSettingsSchema>
+) => {
   const layout = await db.query.file.findFirst({
     where: and(
       eq(file.projectId, fileData.projectId),
@@ -24,18 +28,15 @@ export const serveHtml = async (fileData: FileSchema) => {
   const firstScriptTagIdx = content.indexOf("<script", bodyOpeningTagIdx);
   const injectScripts = ['<script src="/js/hook-console.js"></script>'];
 
+  // prevent direct access
   if (!IS_DEV) {
-    // prevent direct access
     injectScripts.push(
       `<script>if (window === window.parent) {window.location.href = '/';}</script>`
     );
   }
 
-  const importMaps = [
-    { name: "react", url: "https://esm.sh/react@18.2.0" },
-    { name: "react-dom/client", url: "https://esm.sh/react-dom@18.2.0/client" },
-  ];
-
+  // js import maps
+  const importMaps = settings?.js?.packages || [];
   if (importMaps.length > 0) {
     const imports = importMaps.reduce((a: any, b) => {
       a[b.name] = b.url;

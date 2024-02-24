@@ -20,12 +20,14 @@ export function getUrl(...path: string[]) {
 
 export function getPreviewUrl(
   project: Pick<ProjectSchema, "slug">,
-  file: string | Pick<FileSchema, "path">
+  file: string | Pick<FileSchema, "path">,
+  opt?: Partial<{ raw: boolean }>
 ) {
-  return getUrl(
+  const url = getUrl(
     `api/preview/${project.slug}`,
     typeof file === "string" ? file : file.path
   );
+  return opt?.raw ? url + "?raw=true" : url;
 }
 
 export const ucfirst = (str: string) => {

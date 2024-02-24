@@ -15,8 +15,9 @@ import { Data } from "./+data";
 const ViewProjectPage = () => {
   const { project } = useData<Data>();
   const searchParams = useSearchParams();
-  const isCompact =
-    searchParams.get("compact") === "1" || searchParams.get("embed") === "1";
+  const isCompact = !!(
+    searchParams.get("compact") || searchParams.get("embed")
+  );
   const previewUrl = getPreviewUrl(project, "index.html");
 
   return (

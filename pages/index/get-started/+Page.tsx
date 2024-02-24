@@ -12,6 +12,7 @@ import Divider from "~/components/ui/divider";
 import trpc from "~/lib/trpc";
 import { useAuth } from "~/hooks/useAuth";
 import { usePageContext } from "~/renderer/context";
+import { useMemo } from "react";
 
 const schema = z.object({
   forkFromId: z.number(),
@@ -25,15 +26,20 @@ const schema = z.object({
     .optional(),
 });
 
-const initialValue: z.infer<typeof schema> = {
-  forkFromId: 0,
-  title: "",
-};
+type Schema = z.infer<typeof schema>;
 
 const GetStartedPage = () => {
-  const { presets } = useData<Data>();
+  const { presets, forkFrom } = useData<Data>();
   const { isLoggedIn } = useAuth();
   const ctx = usePageContext();
+
+  const initialValue: Schema = useMemo(
+    () => ({
+      forkFromId: forkFrom?.id || 0,
+      title: forkFrom?.title || "",
+    }),
+    [forkFrom]
+  );
 
   const form = useForm(schema, initialValue);
   const create = trpc.project.create.useMutation({
@@ -49,31 +55,37 @@ const GetStartedPage = () => {
   return (
     <div className="container max-w-3xl min-h-[80dvh] flex flex-col items-center justify-center py-8 md:py-16">
       <Card className="w-full md:p-8">
-        <CardTitle>Create New Project</CardTitle>
+        <CardTitle>{(forkFrom ? "Fork" : "Create New") + " Project"}</CardTitle>
 
         <form onSubmit={onSubmit}>
-          <FormLabel>Select Preset</FormLabel>
+          {!forkFrom ? (
+            <>
+              <FormLabel>Select Preset</FormLabel>
 
-          <Controller
-            control={form.control}
-            name="forkFromId"
-            render={({ field }) => (
-              <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-hidden">
-                {presets.map((preset) => (
-                  <Button
-                    key={preset.projectId}
-                    variant={
-                      field.value === preset.projectId ? "default" : "outline"
-                    }
-                    className="flex py-16 border border-white/40 shrink-0 w-[160px] md:w-auto"
-                    onClick={() => field.onChange(preset.projectId)}
-                  >
-                    <p className="text-wrap">{preset.title}</p>
-                  </Button>
-                ))}
-              </div>
-            )}
-          />
+              <Controller
+                control={form.control}
+                name="forkFromId"
+                render={({ field }) => (
+                  <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-hidden">
+                    {presets.map((preset) => (
+                      <Button
+                        key={preset.projectId}
+                        variant={
+                          field.value === preset.projectId
+                            ? "default"
+                            : "outline"
+                        }
+                        className="flex py-16 border border-white/40 shrink-0 w-[160px] md:w-auto"
+                        onClick={() => field.onChange(preset.projectId)}
+                      >
+                        <p className="text-wrap">{preset.title}</p>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              />
+            </>
+          ) : null}
 
           <Input
             form={form}

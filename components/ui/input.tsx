@@ -1,4 +1,4 @@
-import { ForwardedRef, forwardRef, useId } from "react";
+import { forwardRef, useId } from "react";
 import { Controller, FieldValues, Path } from "react-hook-form";
 import { useFormReturn } from "~/hooks/useForm";
 import { cn } from "~/lib/utils";
@@ -17,7 +17,7 @@ const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/40 dark:bg-background dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300",
+          "flex h-10 w-full rounded-md border border-slate-200 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/40 bg-transparent dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300",
           inputClassName
         )}
         ref={ref}

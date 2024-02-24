@@ -18,6 +18,8 @@ import { Data } from "../+data";
 import { useBreakpoint } from "~/hooks/useBreakpoint";
 import StatusBar from "./status-bar";
 import { FiTerminal } from "react-icons/fi";
+import SettingsDialog from "./settings-dialog";
+import FileIcon from "~/components/ui/file-icon";
 
 const Editor = () => {
   const { project, initialFiles } = useData<Data>();
@@ -125,9 +127,11 @@ const Editor = () => {
     tabs = tabs.concat(
       curOpenFiles.map((fileId) => {
         const fileData = openedFiles?.find((i) => i.id === fileId);
+        const filename = fileData?.filename || "...";
 
         return {
-          title: fileData?.filename || "...",
+          title: filename,
+          icon: <FileIcon file={{ isDirectory: false, filename }} />,
           render: () => <FileViewer id={fileId} />,
         };
       })
@@ -180,6 +184,7 @@ const Editor = () => {
                   current={Math.min(Math.max(curTabIdx, 0), tabs.length - 1)}
                   onChange={setCurTabIdx}
                   onClose={onCloseFile}
+                  className="h-full"
                 />
               </ResizablePanel>
 
@@ -203,6 +208,8 @@ const Editor = () => {
 
         <StatusBar className="order-1 md:order-2" />
       </PanelComponent>
+
+      <SettingsDialog />
     </EditorContext.Provider>
   );
 };

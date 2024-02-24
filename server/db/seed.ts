@@ -17,7 +17,12 @@ const main = async () => {
 
   const [vanillaProject] = await db
     .insert(project)
-    .values({ userId: adminUser.id, slug: uid(), title: "Vanilla Project" })
+    .values({
+      userId: adminUser.id,
+      slug: uid(),
+      title: "Vanilla Project",
+      visibility: "public",
+    })
     .returning();
 
   // vanilla html css js template
@@ -69,7 +74,28 @@ const main = async () => {
 
   const [reactProject] = await db
     .insert(project)
-    .values({ userId: adminUser.id, slug: uid(), title: "React Project" })
+    .values({
+      userId: adminUser.id,
+      slug: uid(),
+      title: "React Project",
+      visibility: "public",
+      settings: {
+        css: {
+          preprocessor: "postcss",
+          tailwindcss: true,
+        },
+        js: {
+          transpiler: "swc",
+          packages: [
+            { name: "react", url: "https://esm.sh/react@18.2.0" },
+            {
+              name: "react-dom/client",
+              url: "https://esm.sh/react-dom@18.2.0/client",
+            },
+          ],
+        },
+      },
+    })
     .returning();
 
   // react template

@@ -3,6 +3,7 @@ import type { Data } from "./+data";
 import { useData } from "~/renderer/hooks";
 import Link from "~/renderer/link";
 import Footer from "~/components/containers/footer";
+import ProjectCard from "~/components/containers/project-card";
 
 const HomePage = () => {
   const { projects } = useData<Data>();
@@ -35,20 +36,7 @@ const HomePage = () => {
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/${project.slug}`}
-                className="border border-white/20 hover:border-white/40 rounded-lg transition-colors overflow-hidden"
-              >
-                <div className="w-full aspect-[3/2] bg-gray-900"></div>
-                <div className="py-2 px-3 flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-white/80"></div>
-                  <div>
-                    <p className="text-md truncate">{project.title}</p>
-                    <p className="text-xs truncate">{project.user.name}</p>
-                  </div>
-                </div>
-              </Link>
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         </section>
