@@ -28,6 +28,7 @@ export const screenshot = async (slug: string) => {
 
     closeHandler = setTimeout(() => {
       browser?.close();
+      browser = null;
       closeHandler = null;
     }, 60000);
 

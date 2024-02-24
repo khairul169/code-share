@@ -1,24 +1,44 @@
 import { Request, Response } from "express";
 import { screenshot } from "../lib/screenshot";
 
-const cache = new Map<string, Buffer>();
+const cache = new Map<string, { data: Buffer; timestamp: number }>();
 
-export const thumbnail = async (req: Request, res: Response) => {
-  const { slug } = req.params;
-  const cacheData = cache.get(slug);
+const regenerateThumbnail = async (slug: string) => {
+  const curCache = cache.get(slug);
 
-  if (cacheData) {
-    res.contentType("image/jpeg");
-    return res.send(cacheData);
+  if (curCache?.data) {
+    cache.set(slug, {
+      data: curCache.data,
+      timestamp: Date.now(),
+    });
   }
 
   const result = await screenshot(slug);
   if (!result) {
-    return res.status(400).send("Cannot generate thumbnail!");
+    return curCache;
   }
 
-  cache.set(slug, result);
+  const data = {
+    data: result,
+    timestamp: Date.now(),
+  };
+
+  cache.set(slug, data);
+  return data;
+};
+
+export const thumbnail = async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  let cacheData = cache.get(slug);
+
+  if (!cacheData) {
+    cacheData = await regenerateThumbnail(slug);
+  }
+
+  if (cacheData && Date.now() - cacheData.timestamp > 10000) {
+    regenerateThumbnail(slug);
+  }
 
   res.contentType("image/jpeg");
-  res.send(result);
+  res.send(cacheData?.data);
 };
