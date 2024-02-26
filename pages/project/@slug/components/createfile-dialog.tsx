@@ -13,6 +13,7 @@ import FormErrorMessage from "../../../../components/ui/form-error-message";
 import trpc from "~/lib/trpc";
 import type { FileSchema } from "~/server/db/schema/file";
 import { useWatch } from "react-hook-form";
+import { useProjectContext } from "../context/project";
 
 type Props = {
   disclose: UseDiscloseReturn<CreateFileSchema>;
@@ -33,6 +34,7 @@ const defaultValues: z.infer<typeof fileSchema> = {
 };
 
 const CreateFileDialog = ({ disclose, onSuccess }: Props) => {
+  const { project } = useProjectContext();
   const form = useForm(fileSchema, disclose.data || defaultValues);
   const isDir = useWatch({ name: "isDirectory", control: form.control });
 
@@ -55,9 +57,9 @@ const CreateFileDialog = ({ disclose, onSuccess }: Props) => {
     }
 
     if (values.id) {
-      update.mutate({ id: values.id!, ...values });
+      update.mutate({ ...values, id: values.id!, projectId: project.id });
     } else {
-      create.mutate(values);
+      create.mutate({ ...values, projectId: project.id });
     }
   });
 

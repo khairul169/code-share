@@ -17,9 +17,11 @@ import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
 import { useBreakpoint } from "~/hooks/useBreakpoint";
 import StatusBar from "./status-bar";
-import { FiTerminal } from "react-icons/fi";
+import { FiServer, FiTerminal } from "react-icons/fi";
 import SettingsDialog from "./settings-dialog";
 import FileIcon from "~/components/ui/file-icon";
+import APIManager from "./api-manager";
+import { api } from "~/lib/api";
 
 const Editor = () => {
   const { project, initialFiles } = useData<Data>();
@@ -70,6 +72,11 @@ const Editor = () => {
       setOpenedFiles(openedFilesData.data);
     }
   }, [openedFilesData.data]);
+
+  useEffect(() => {
+    // start API sandbox
+    api(`/sandbox/${project.slug}/start`, { method: "POST" }).catch(() => {});
+  }, [project]);
 
   const onOpenFile = useCallback(
     (fileId: number, autoSwitchTab = true) => {
@@ -146,6 +153,13 @@ const Editor = () => {
         locked: true,
       });
     }
+
+    tabs.push({
+      title: "API",
+      icon: <FiServer />,
+      render: () => <APIManager />,
+      locked: true,
+    });
 
     return tabs;
   }, [curOpenFiles, openedFiles, breakpoint]);

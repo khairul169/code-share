@@ -3,16 +3,16 @@ import tailwindcss from "tailwindcss";
 import cssnano from "cssnano";
 import { FileSchema } from "~/server/db/schema/file";
 import { unpackProject } from "~/server/lib/unpack-project";
-import { ProjectSettingsSchema } from "~/server/db/schema/project";
+import { ProjectSchema } from "~/server/db/schema/project";
 
-export const postcss = async (
-  fileData: FileSchema,
-  cfg?: ProjectSettingsSchema["css"]
-) => {
+export const postcss = async (project: ProjectSchema, fileData: FileSchema) => {
   const content = fileData.content || "";
+  const cfg = project.settings?.css;
 
   try {
-    const projectDir = await unpackProject({ ext: "ts,tsx,js,jsx,html" });
+    const projectDir = await unpackProject(project, {
+      ext: "ts,tsx,js,jsx,html",
+    });
     const plugins: any[] = [];
 
     if (cfg?.tailwindcss) {

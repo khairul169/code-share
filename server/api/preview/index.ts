@@ -45,7 +45,7 @@ const get = async (req: Request, res: Response) => {
     }
 
     if (["css"].includes(ext) && settings.css?.preprocessor === "postcss") {
-      content = await postcss(fileData, settings.css);
+      content = await postcss(projectData, fileData);
     }
   }
 

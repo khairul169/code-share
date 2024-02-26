@@ -5,12 +5,14 @@ import db from "../db";
 import { file } from "../db/schema/file";
 import { fileExists, getProjectDir } from "./utils";
 import { getFileExt } from "~/lib/utils";
+import { ProjectSchema } from "../db/schema/project";
 
 type UnpackProjectOptions = {
   ext: string;
 };
 
 export const unpackProject = async (
+  projectData: ProjectSchema,
   opt: Partial<UnpackProjectOptions> = {}
 ) => {
   const files = await db.query.file.findMany({
@@ -21,7 +23,7 @@ export const unpackProject = async (
     ),
   });
 
-  const projectDir = getProjectDir();
+  const projectDir = getProjectDir(projectData);
   if (!fileExists(projectDir)) {
     await fs.mkdir(projectDir, { recursive: true });
   }

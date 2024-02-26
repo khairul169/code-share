@@ -3,7 +3,7 @@ import Panel from "~/components/ui/panel";
 import { ComponentProps, useCallback, useEffect, useRef } from "react";
 import { useProjectContext } from "../context/project";
 import { Button } from "~/components/ui/button";
-import { FaRedo } from "react-icons/fa";
+import { FaExternalLinkAlt, FaRedo } from "react-icons/fa";
 import { previewStore } from "../stores/web-preview";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import useCommandKey from "~/hooks/useCommandKey";
@@ -74,6 +74,13 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
             onClick={refresh}
           >
             <FaRedo />
+          </Button>
+          <Button
+            variant="ghost"
+            className="dark:hover:bg-slate-700"
+            onClick={() => window.open(url || "#", "_blank")}
+          >
+            <FaExternalLinkAlt />
           </Button>
         </div>
 

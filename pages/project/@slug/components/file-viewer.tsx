@@ -5,12 +5,14 @@ import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
 import Spinner from "~/components/ui/spinner";
 import { previewStore } from "../stores/web-preview";
+import { useProjectContext } from "../context/project";
 
 type Props = {
   id: number;
 };
 
 const FileViewer = ({ id }: Props) => {
+  const { project } = useProjectContext();
   const { initialFiles } = useData<Data>();
   const initialData = initialFiles.find((i) => i.id === id);
 
@@ -48,7 +50,9 @@ const FileViewer = ({ id }: Props) => {
         lang={ext}
         value={data?.content || ""}
         formatOnSave
-        onChange={(val) => updateFileContent.mutate({ id, content: val })}
+        onChange={(val) =>
+          updateFileContent.mutate({ projectId: project.id, id, content: val })
+        }
       />
     );
   }

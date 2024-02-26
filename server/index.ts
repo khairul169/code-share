@@ -5,6 +5,7 @@ import { IS_DEV } from "./lib/consts";
 import cookieParser from "cookie-parser";
 import api from "./api";
 import { authMiddleware } from "./middlewares/auth";
+import fetch from "node-fetch";
 
 async function createServer() {
   const app = express();

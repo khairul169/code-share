@@ -38,6 +38,7 @@ const fileRouter = router({
   create: procedure
     .input(
       insertFileSchema.pick({
+        projectId: true,
         parentId: true,
         filename: true,
         isDirectory: true,
@@ -57,7 +58,7 @@ const fileRouter = router({
       }
 
       const data: z.infer<typeof insertFileSchema> = {
-        projectId: 1,
+        projectId: input.projectId,
         parentId: input.parentId,
         path: basePath + input.filename,
         filename: input.filename,
@@ -69,10 +70,14 @@ const fileRouter = router({
     }),
 
   update: procedure
-    .input(selectFileSchema.partial().required({ id: true }))
+    .input(selectFileSchema.partial().required({ id: true, projectId: true }))
     .mutation(async ({ input }) => {
       const fileData = await db.query.file.findFirst({
-        where: and(eq(file.id, input.id), isNull(file.deletedAt)),
+        where: and(
+          eq(file.projectId, input.projectId),
+          eq(file.id, input.id),
+          isNull(file.deletedAt)
+        ),
       });
       if (!fileData) {
         throw new TRPCError({ code: "NOT_FOUND" });

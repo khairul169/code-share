@@ -214,6 +214,7 @@ const FileItem = ({ file, createFileDlg }: FileItemProps) => {
               <DropdownMenuItem
                 onClick={() => {
                   return updateFile.mutate({
+                    projectId: file.projectId,
                     id: file.id,
                     isPinned: !file.isPinned,
                   });
