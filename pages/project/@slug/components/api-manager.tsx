@@ -92,7 +92,7 @@ const Actions = ({ stats }: any) => {
     },
     onSuccess: () => stats.refetch(),
   });
-  const proxyUrl = `/api/sandbox/${project.slug}/proxy`;
+  const { address } = stats.data?.result;
 
   return (
     <div className="flex items-center gap-2">
@@ -108,26 +108,26 @@ const Actions = ({ stats }: any) => {
         icon={FaCopy}
         variant="outline"
         size="md"
-        onClick={() => copy(proxyUrl)}
+        onClick={() => copy(address)}
       />
       <ActionButton
         icon={FaExternalLinkAlt}
         variant="outline"
         size="md"
-        onClick={() => window.open(getUrl(proxyUrl), "_blank")}
+        onClick={() => window.open(address, "_blank")}
       />
     </div>
   );
 };
 
 const Stats = ({ data }: any) => {
-  const { cpu, mem, memUsage, network, status, addr } = data;
+  const { cpu, mem, memUsage, network, status, address } = data;
   const [memUsed, memTotal] = memUsage || [];
 
   return (
     <div className="flex flex-col text-sm flex-1">
       <p>Status: {status}</p>
-      <p>Address: {addr}</p>
+      <p>Address: {address}</p>
       <p>CPU: {cpu}%</p>
       <p>
         Memory: {memUsed != null ? `${memUsed} / ${memTotal} (${mem}%)` : "-"}

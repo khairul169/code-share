@@ -47,8 +47,8 @@ const SettingsDialog = () => {
   const initialValues = useMemo(() => {
     return Object.assign(defaultValues, {
       title: project.title,
-      //   slug: project.slug,
       settings: project.settings,
+      visibility: project.visibility,
     });
   }, [project]);
 
