@@ -130,13 +130,18 @@ function getLangMetadata(lang: string) {
     case "js":
     case "ts":
     case "tsx":
+      const isTypescript = ["tsx", "ts"].includes(lang);
       extensions = [
         javascript({
           jsx: ["jsx", "tsx"].includes(lang),
-          typescript: ["tsx", "ts"].includes(lang),
+          typescript: isTypescript,
         }),
       ];
-      formatter = ["babel", prettierBabelPlugin, prettierPluginEstree];
+      formatter = [
+        isTypescript ? "babel-ts" : "babel",
+        prettierBabelPlugin,
+        prettierPluginEstree,
+      ];
       break;
   }
 

@@ -17,6 +17,7 @@ export const unpackProject = async (
 ) => {
   const files = await db.query.file.findMany({
     where: and(
+      eq(file.projectId, projectData.id),
       eq(file.isDirectory, false),
       eq(file.isFile, false),
       isNull(file.deletedAt)

@@ -116,6 +116,17 @@ const projectRouter = router({
         const projectId = projectData.id;
 
         if (input.forkFromId) {
+          const forkProject = await tx.query.project.findFirst({
+            where: and(
+              eq(project.id, input.forkFromId),
+              isNull(project.deletedAt)
+            ),
+          });
+
+          if (!forkProject) {
+            throw new Error("Fork Project not found!");
+          }
+
           const forkFiles = await tx.query.file.findMany({
             where: and(
               eq(file.projectId, input.forkFromId),
@@ -132,6 +143,11 @@ const projectRouter = router({
           await tx
             .insert(file)
             .values(forkFiles.map((file) => ({ ...file, projectId })));
+
+          await tx
+            .update(project)
+            .set({ settings: forkProject.settings })
+            .where(eq(project.id, projectData.id));
         } else {
           await tx.insert(file).values([
             {

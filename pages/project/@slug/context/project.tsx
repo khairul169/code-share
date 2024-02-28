@@ -4,6 +4,7 @@ import type { ProjectSchema } from "~/server/db/schema/project";
 type TProjectContext = {
   project: ProjectSchema;
   isCompact?: boolean;
+  isEmbed?: boolean;
 };
 
 const ProjectContext = createContext<TProjectContext | null>(null);

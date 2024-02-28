@@ -86,6 +86,7 @@ const APIManager = () => {
 
 const Actions = ({ stats }: any) => {
   const { project } = useProjectContext();
+
   const restart = useMutation({
     mutationFn: () => {
       return api(`/sandbox/${project.slug}/restart`, { method: "POST" });

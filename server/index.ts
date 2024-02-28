@@ -5,7 +5,6 @@ import { IS_DEV } from "./lib/consts";
 import cookieParser from "cookie-parser";
 import api from "./api";
 import { authMiddleware } from "./middlewares/auth";
-import fetch from "node-fetch";
 
 async function createServer() {
   const app = express();
@@ -24,8 +23,12 @@ async function createServer() {
   } else {
     // serve client assets
     app.use(express.static(root + "/dist/client"));
+
+    const { default: morgan } = await import("morgan");
+    app.use(morgan("combined"));
   }
 
+  app.set("etag", false);
   app.use(cookieParser());
   app.use(authMiddleware);
 
@@ -42,9 +45,11 @@ async function createServer() {
     }
 
     const { body, statusCode, headers, earlyHints } = httpResponse;
-    if (res.writeEarlyHints) {
-      res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) });
-    }
+
+    // FIXME: SSL cloudflare gak bisa digunakan kalo ada ini..
+    // if (res.writeEarlyHints) {
+    //   res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) });
+    // }
 
     headers.forEach(([name, value]) => res.setHeader(name, value));
     res.status(statusCode).send(body);

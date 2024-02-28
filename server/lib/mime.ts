@@ -3,7 +3,7 @@ import standardTypes from "mime/types/standard.js";
 import otherTypes from "mime/types/other.js";
 
 const mime = new Mime(standardTypes, otherTypes);
-mime.define({ "text/javascript": ["jsx", "tsx"] }, true);
+mime.define({ "text/javascript": ["jsx", "tsx", "ts"] }, true);
 
 export const getMimeType = (
   ext: string,

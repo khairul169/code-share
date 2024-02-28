@@ -56,7 +56,7 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
     refresh();
   }, [refresh, togglePanel]);
 
-  const PanelComponent = !project.isCompact ? Panel : "div";
+  const PanelComponent = !project.isCompact || !project.isEmbed ? Panel : "div";
 
   return (
     <ResizablePanel
@@ -89,7 +89,7 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
             id="web-preview"
             ref={frameRef}
             className="border-none w-full flex-1 overflow-hidden bg-white"
-            sandbox="allow-scripts"
+            sandbox="allow-scripts allow-forms"
           />
         ) : null}
       </PanelComponent>

@@ -1,12 +1,13 @@
 import * as swc from "@swc/core";
 
-export const transformJs = async (code: string) => {
+export const transformJs = async (code: string, type: "js" | "ts" = "js") => {
   try {
     const result = await swc.transform(code, {
       jsc: {
         parser: {
+          syntax: type === "js" ? "ecmascript" : "typescript",
           jsx: true,
-          syntax: "ecmascript",
+          tsx: true,
         },
         target: "es5",
       },
@@ -14,6 +15,7 @@ export const transformJs = async (code: string) => {
 
     return result.code;
   } catch (err) {
+    // console.log(err);
     return code;
   }
 };

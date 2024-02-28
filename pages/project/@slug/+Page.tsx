@@ -15,20 +15,23 @@ import { Data } from "./+data";
 const ViewProjectPage = () => {
   const { project } = useData<Data>();
   const searchParams = useSearchParams();
-  const isCompact = !!(
-    searchParams.get("compact") || searchParams.get("embed")
-  );
+  const isCompact = Boolean(searchParams.get("compact"));
+  const isEmbed = Boolean(searchParams.get("embed"));
+  const hidePreview = searchParams.get("preview") === "0";
   const previewUrl = getPreviewUrl(project, "index.html");
 
   return (
-    <ProjectContext.Provider value={{ project, isCompact }}>
+    <ProjectContext.Provider value={{ project, isCompact, isEmbed }}>
       <ResizablePanelGroup
         autoSaveId="main-panel"
         direction={{ sm: "vertical", md: "horizontal" }}
-        className={cn("w-full !h-dvh bg-slate-600", !isCompact ? "md:p-4" : "")}
+        className={cn(
+          "w-full !h-dvh bg-slate-600",
+          !isCompact && !isEmbed ? "md:p-4" : ""
+        )}
       >
         <ResizablePanel
-          defaultSize={60}
+          defaultSize={hidePreview ? 100 : 60}
           collapsible
           collapsedSize={0}
           minSize={30}
@@ -38,13 +41,14 @@ const ViewProjectPage = () => {
         <ResizableHandle
           withHandle
           className={
-            !isCompact
+            !isCompact && !isEmbed
               ? "bg-slate-800 md:bg-transparent hover:bg-slate-500 transition-colors md:mx-1 w-2 md:data-[panel-group-direction=vertical]:h-2 md:rounded-lg"
               : "bg-slate-800"
           }
         />
         <WebPreview
           defaultSize={40}
+          defaultCollapsed={hidePreview}
           collapsible
           collapsedSize={0}
           minSize={10}

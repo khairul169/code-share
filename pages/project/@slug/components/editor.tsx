@@ -73,10 +73,10 @@ const Editor = () => {
     }
   }, [openedFilesData.data]);
 
-  useEffect(() => {
-    // start API sandbox
-    api(`/sandbox/${project.slug}/start`, { method: "POST" }).catch(() => {});
-  }, [project]);
+  // useEffect(() => {
+  //   // start API sandbox
+  //   api(`/sandbox/${project.slug}/start`, { method: "POST" }).catch(() => {});
+  // }, [project]);
 
   const onOpenFile = useCallback(
     (fileId: number, autoSwitchTab = true) => {
@@ -154,17 +154,18 @@ const Editor = () => {
       });
     }
 
-    tabs.push({
-      title: "API",
-      icon: <FiServer />,
-      render: () => <APIManager />,
-      locked: true,
-    });
+    // tabs.push({
+    //   title: "API",
+    //   icon: <FiServer />,
+    //   render: () => <APIManager />,
+    //   locked: true,
+    // });
 
     return tabs;
   }, [curOpenFiles, openedFiles, breakpoint]);
 
-  const PanelComponent = !projectCtx.isCompact ? Panel : "div";
+  const PanelComponent =
+    !projectCtx.isCompact || !projectCtx.isEmbed ? Panel : "div";
 
   return (
     <EditorContext.Provider
@@ -181,8 +182,8 @@ const Editor = () => {
           className="flex-1 order-2 md:order-1"
         >
           <Sidebar
-            defaultSize={{ sm: 50, md: 25 }}
-            defaultCollapsed={{ sm: true, md: false }}
+            defaultSize={{ md: 50, lg: 25 }}
+            defaultCollapsed={{ md: true, lg: false }}
             minSize={10}
             collapsible
             collapsedSize={0}
@@ -190,7 +191,7 @@ const Editor = () => {
 
           <ResizableHandle className="w-0" />
 
-          <ResizablePanel defaultSize={{ sm: 100, md: 75 }}>
+          <ResizablePanel defaultSize={{ md: 100, lg: 75 }}>
             <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
               <ResizablePanel defaultSize={{ sm: 100, md: 80 }} minSize={20}>
                 <Tabs
