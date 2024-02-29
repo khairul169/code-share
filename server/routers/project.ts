@@ -5,6 +5,7 @@ import {
   project,
   insertProjectSchema,
   selectProjectSchema,
+  ProjectSchema,
 } from "../db/schema/project";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -15,6 +16,7 @@ import { ucwords } from "~/lib/utils";
 import { hashPassword } from "../lib/crypto";
 import { createToken } from "../lib/jwt";
 import { file } from "../db/schema/file";
+import { Context } from "../api/trpc/context";
 
 const projectRouter = router({
   getAll: procedure
@@ -45,7 +47,7 @@ const projectRouter = router({
 
   getById: procedure
     .input(z.number().or(z.string()))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const where = and(
         typeof input === "string"
           ? eq(project.slug, input)
@@ -53,12 +55,20 @@ const projectRouter = router({
         isNull(project.deletedAt)
       );
 
-      return db.query.project.findFirst({
+      const result = await db.query.project.findFirst({
         where,
         with: {
           user: { columns: { password: false } },
         },
       });
+
+      if (!hasPermission(ctx, result, "r")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      const isMutable = hasPermission(ctx, result, "w");
+
+      return { ...result, isMutable };
     }),
 
   create: procedure
@@ -127,6 +137,10 @@ const projectRouter = router({
             throw new Error("Fork Project not found!");
           }
 
+          if (!hasPermission(ctx, forkProject, "r")) {
+            throw new TRPCError({ code: "FORBIDDEN" });
+          }
+
           const forkFiles = await tx.query.file.findMany({
             where: and(
               eq(file.projectId, input.forkFromId),
@@ -146,7 +160,7 @@ const projectRouter = router({
 
           await tx
             .update(project)
-            .set({ settings: forkProject.settings })
+            .set({ settings: forkProject.settings, forkId: forkProject.id })
             .where(eq(project.id, projectData.id));
         } else {
           await tx.insert(file).values([
@@ -171,7 +185,7 @@ const projectRouter = router({
         .omit({ slug: true, userId: true })
         .required({ id: true })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const data = { ...input };
 
       const projectData = await db.query.project.findFirst({
@@ -179,6 +193,10 @@ const projectRouter = router({
       });
       if (!projectData) {
         throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (!hasPermission(ctx, projectData, "w")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
       }
 
       if (data.settings) {
@@ -197,12 +215,16 @@ const projectRouter = router({
       return result;
     }),
 
-  delete: procedure.input(z.number()).mutation(async ({ input }) => {
+  delete: procedure.input(z.number()).mutation(async ({ ctx, input }) => {
     const projectData = await db.query.project.findFirst({
       where: and(eq(project.id, input), isNull(project.deletedAt)),
     });
     if (!projectData) {
       throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    if (!hasPermission(ctx, projectData, "r")) {
+      throw new TRPCError({ code: "FORBIDDEN" });
     }
 
     const [result] = await db
@@ -231,5 +253,39 @@ const projectRouter = router({
     ];
   }),
 });
+
+export function hasPermission(
+  ctx: Context,
+  project: Pick<ProjectSchema, "userId" | "visibility"> | undefined,
+  permission: "r" | "w"
+) {
+  if (!project) {
+    return false;
+  }
+
+  let read = false,
+    write = false;
+
+  if (ctx.user?.id === project.userId) {
+    read = true;
+    write = true;
+  }
+
+  if (["public", "unlisted"].includes(project.visibility as never)) {
+    read = true;
+  }
+
+  return permission === "r" ? read : write;
+}
+
+export async function getProjectById(id: number) {
+  const projectData = await db.query.project.findFirst({
+    where: and(eq(project.id, id), isNull(project.deletedAt)),
+  });
+  if (!projectData) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+  return projectData;
+}
 
 export default projectRouter;

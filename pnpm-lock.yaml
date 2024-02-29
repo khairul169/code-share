@@ -94,7 +94,7 @@ dependencies:
     version: 16.4.5
   drizzle-orm:
     specifier: ^0.29.3
-    version: 0.29.3(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0)
+    version: 0.29.3(@types/better-sqlite3@7.6.9)(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0)
   drizzle-zod:
     specifier: ^0.5.1
     version: 0.5.1(drizzle-orm@0.29.3)(zod@3.22.4)
@@ -172,6 +172,9 @@ devDependencies:
   '@types/bcrypt':
     specifier: ^5.0.2
     version: 5.0.2
+  '@types/better-sqlite3':
+    specifier: ^7.6.9
+    version: 7.6.9
   '@types/cookie-parser':
     specifier: ^1.4.6
     version: 1.4.6
@@ -2267,6 +2270,11 @@ packages:
       '@types/node': 20.11.19
     dev: true
 
+  /@types/better-sqlite3@7.6.9:
+    resolution: {integrity: sha512-FvktcujPDj9XKMJQWFcl2vVl7OdRIqsSRX9b0acWwTmwLK9CF2eqo/FRcmMLNpugKoX/avA6pb7TorDLmpgTnQ==}
+    dependencies:
+      '@types/node': 20.11.19
+
   /@types/body-parser@1.19.5:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
     dependencies:
@@ -3489,7 +3497,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.29.3(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0):
+  /drizzle-orm@0.29.3(@types/better-sqlite3@7.6.9)(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0):
     resolution: {integrity: sha512-uSE027csliGSGYD0pqtM+SAQATMREb3eSM/U8s6r+Y0RFwTKwftnwwSkqx3oS65UBgqDOM0gMTl5UGNpt6lW0A==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -3560,6 +3568,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
+      '@types/better-sqlite3': 7.6.9
       '@types/react': 18.2.57
       better-sqlite3: 9.4.2
       react: 18.2.0
@@ -3571,7 +3580,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.29.3(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0)
+      drizzle-orm: 0.29.3(@types/better-sqlite3@7.6.9)(@types/react@18.2.57)(better-sqlite3@9.4.2)(react@18.2.0)
       zod: 3.22.4
     dev: false
 

@@ -17,11 +17,9 @@ import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
 import { useBreakpoint } from "~/hooks/useBreakpoint";
 import StatusBar from "./status-bar";
-import { FiServer, FiTerminal } from "react-icons/fi";
+import { FiTerminal } from "react-icons/fi";
 import SettingsDialog from "./settings-dialog";
 import FileIcon from "~/components/ui/file-icon";
-import APIManager from "./api-manager";
-import { api } from "~/lib/api";
 
 const Editor = () => {
   const { project, initialFiles } = useData<Data>();

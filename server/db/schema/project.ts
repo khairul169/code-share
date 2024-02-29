@@ -1,5 +1,11 @@
 import { relations, sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  foreignKey,
+  index,
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { user } from "./user";
@@ -23,6 +29,7 @@ export const project = sqliteTable(
     userId: integer("user_id")
       .notNull()
       .references(() => user.id),
+    forkId: integer("fork_id"),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
 
@@ -40,12 +47,21 @@ export const project = sqliteTable(
     deletedAt: text("deleted_at"),
   },
   (table) => ({
+    forkIdFk: foreignKey({
+      columns: [table.forkId],
+      foreignColumns: [table.id],
+      name: "project_fork_id_fk",
+    }),
     visibilityEnum: index("project_visibility_idx").on(table.visibility),
   })
 );
 
 export const projectRelations = relations(project, ({ one, many }) => ({
   files: many(file),
+  fork: one(project, {
+    fields: [project.forkId],
+    references: [project.id],
+  }),
   user: one(user, {
     fields: [project.userId],
     references: [user.id],

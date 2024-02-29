@@ -4,6 +4,7 @@ import { procedure, router } from "../api/trpc";
 import { file, insertFileSchema, selectFileSchema } from "../db/schema/file";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { getProjectById, hasPermission } from "./project";
 
 const fileRouter = router({
   getAll: procedure
@@ -14,7 +15,13 @@ const fileRouter = router({
         isPinned: z.boolean().optional(),
       })
     )
-    .query(async ({ input: opt }) => {
+    .query(async ({ ctx, input: opt }) => {
+      const project = await getProjectById(opt.projectId);
+
+      if (!hasPermission(ctx, project, "r")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
       const files = await db.query.file.findMany({
         where: and(
           eq(file.projectId, opt.projectId),
@@ -29,10 +36,21 @@ const fileRouter = router({
       return files;
     }),
 
-  getById: procedure.input(z.number()).query(async ({ input }) => {
-    return db.query.file.findFirst({
+  getById: procedure.input(z.number()).query(async ({ ctx, input }) => {
+    const result = await db.query.file.findFirst({
       where: and(eq(file.id, input), isNull(file.deletedAt)),
+      with: { project: { columns: { visibility: true, userId: true } } },
     });
+
+    if (!result) {
+      return undefined;
+    }
+
+    if (!hasPermission(ctx, result?.project, "r")) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return result;
   }),
 
   create: procedure
@@ -44,7 +62,13 @@ const fileRouter = router({
         isDirectory: true,
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const project = await getProjectById(input.projectId);
+
+      if (!hasPermission(ctx, project, "w")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
       let basePath = "";
       if (input.parentId) {
         const parent = await db.query.file.findFirst({
@@ -58,7 +82,7 @@ const fileRouter = router({
       }
 
       const data: z.infer<typeof insertFileSchema> = {
-        projectId: input.projectId,
+        projectId: project.id,
         parentId: input.parentId,
         path: basePath + input.filename,
         filename: input.filename,
@@ -71,16 +95,21 @@ const fileRouter = router({
 
   update: procedure
     .input(selectFileSchema.partial().required({ id: true, projectId: true }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const fileData = await db.query.file.findFirst({
         where: and(
           eq(file.projectId, input.projectId),
           eq(file.id, input.id),
           isNull(file.deletedAt)
         ),
+        with: { project: { columns: { visibility: true, userId: true } } },
       });
+
       if (!fileData) {
         throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      if (!hasPermission(ctx, fileData.project, "w")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
       }
 
       return db.transaction(async (tx) => {
@@ -109,12 +138,16 @@ const fileRouter = router({
       });
     }),
 
-  delete: procedure.input(z.number()).mutation(async ({ input }) => {
+  delete: procedure.input(z.number()).mutation(async ({ ctx, input }) => {
     const fileData = await db.query.file.findFirst({
       where: and(eq(file.id, input), isNull(file.deletedAt)),
+      with: { project: { columns: { visibility: true, userId: true } } },
     });
     if (!fileData) {
       throw new TRPCError({ code: "NOT_FOUND" });
+    }
+    if (!hasPermission(ctx, fileData.project, "w")) {
+      throw new TRPCError({ code: "FORBIDDEN" });
     }
 
     return db.transaction(async (tx) => {
