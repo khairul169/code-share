@@ -58,26 +58,28 @@ const ResizablePanel = forwardRef((props: ResizablePanelProps, ref: any) => {
   );
 });
 
-const ResizableHandle = ({
-  withHandle,
-  className,
-  ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
+type ResizableHandleProps = React.ComponentProps<
+  typeof ResizablePrimitive.PanelResizeHandle
+> & {
   withHandle?: boolean;
-}) => (
-  <ResizablePrimitive.PanelResizeHandle
-    className={cn(
-      "relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
-      className
-    )}
-    {...props}
-  >
-    {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800">
-        <GripVertical className="h-2.5 w-2.5" />
-      </div>
-    )}
-  </ResizablePrimitive.PanelResizeHandle>
-);
+};
+
+const ResizableHandle = (props: ResizableHandleProps) => {
+  const { withHandle, className, ...restProps } = props;
+  return (
+    <ResizablePrimitive.PanelResizeHandle
+      className={cn(
+        "relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+        withHandle && "w-3 bg-black group",
+        className
+      )}
+      {...restProps}
+    >
+      {withHandle && (
+        <div className="z-10 flex h-full max-h-[100px] w-1.5 items-center justify-center rounded-full bg-white/30 group-hover:bg-white/40"></div>
+      )}
+    </ResizablePrimitive.PanelResizeHandle>
+  );
+};
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle };

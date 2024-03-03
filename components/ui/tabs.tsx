@@ -16,17 +16,9 @@ type Props = {
   onChange?: (idx: number) => void;
   onClose?: (idx: number) => void;
   className?: string;
-  containerClassName?: string;
 };
 
-const Tabs = ({
-  tabs,
-  current = 0,
-  onChange,
-  onClose,
-  className,
-  containerClassName,
-}: Props) => {
+const Tabs = ({ tabs, current = 0, onChange, onClose, className }: Props) => {
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
   const onWheel = (e: WheelEvent) => {
@@ -64,43 +56,44 @@ const Tabs = ({
     container.scrollTo({ left: scrollX, behavior: "smooth" });
   }, [tabs, current]);
 
-  const tabView = useMemo(() => {
-    const tab = tabs[current];
-    const element = tab?.render ? tab.render() : null;
-    return element;
-  }, [tabs, current]);
-
-  return (
-    <div
+  return tabs.length > 0 ? (
+    <nav
+      ref={tabContainerRef}
       className={cn(
-        "w-full flex flex-col items-stretch bg-slate-800",
+        "flex items-stretch overflow-x-auto h-10 gap-1 hide-scrollbar",
         className
       )}
     >
-      {tabs.length > 0 ? (
-        <nav
-          ref={tabContainerRef}
-          className="flex items-stretch overflow-x-auto w-full h-10 min-h-10 hide-scrollbar"
-        >
-          {tabs.map((tab, idx) => (
-            <TabItem
-              key={idx}
-              index={idx}
-              title={tab.title}
-              icon={tab.icon}
-              isActive={idx === current}
-              onSelect={() => onChange && onChange(idx)}
-              onClose={!tab.locked && onClose ? () => onClose(idx) : null}
-            />
-          ))}
-        </nav>
-      ) : null}
+      {tabs.map((tab, idx) => (
+        <TabItem
+          key={idx}
+          index={idx}
+          title={tab.title}
+          icon={tab.icon}
+          isActive={idx === current}
+          onSelect={() => onChange && onChange(idx)}
+          onClose={!tab.locked && onClose ? () => onClose(idx) : null}
+        />
+      ))}
+    </nav>
+  ) : null;
+};
 
-      <main className={cn("flex-1 overflow-hidden", containerClassName)}>
-        {tabView}
-      </main>
-    </div>
-  );
+type TabViewProps = {
+  tabs: Tab[];
+  current: number;
+  className?: string;
+};
+
+export const TabView = ({ tabs, current, className }: TabViewProps) => {
+  const tabView = useMemo(() => {
+    const tab = tabs[current];
+    const element = tab?.render ? tab.render() : null;
+
+    return element;
+  }, [tabs, current]);
+
+  return <main className={cn("overflow-hidden", className)}>{tabView}</main>;
 };
 
 type TabItemProps = {
@@ -128,8 +121,8 @@ const TabItem = ({
     <div
       data-idx={index}
       className={cn(
-        "group border-b-2 border-transparent truncate flex-shrink-0 text-white/70 transition-all hover:text-white text-center max-w-[140px] md:max-w-[180px] text-sm flex items-center gap-0 relative z-[1]",
-        isActive ? "border-slate-500 text-white" : ""
+        "group truncate flex-shrink-0 h-full bg-white/10 rounded-lg text-white/70 transition-all hover:text-white text-center max-w-[140px] md:max-w-[180px] text-sm flex items-center gap-0 relative z-[1]",
+        isActive ? "bg-white/20 text-white" : ""
       )}
       onClick={onSelect}
     >

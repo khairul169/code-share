@@ -4,12 +4,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "~/components/ui/resizable";
-import Tabs, { Tab } from "~/components/ui/tabs";
+import Tabs, { Tab, TabView } from "~/components/ui/tabs";
 import FileViewer from "./file-viewer";
 import trpc from "~/lib/trpc";
 import EditorContext from "../context/editor";
 import type { FileSchema } from "~/server/db/schema/file";
-import Panel from "~/components/ui/panel";
 import { useProjectContext } from "../context/project";
 import Sidebar from "./sidebar";
 import ConsoleLogger from "./console-logger";
@@ -22,11 +21,14 @@ import SettingsDialog from "./settings-dialog";
 import FileIcon from "~/components/ui/file-icon";
 import { api } from "~/lib/api";
 import { useMutation } from "@tanstack/react-query";
+import { Button } from "~/components/ui/button";
+import { FaExternalLinkAlt } from "react-icons/fa";
+import { BASE_URL } from "~/lib/consts";
 
 const Editor = () => {
   const { project, initialFiles } = useData<Data>();
   const trpcUtils = trpc.useUtils();
-  const projectCtx = useProjectContext();
+  const { isEmbed } = useProjectContext();
   const [breakpoint] = useBreakpoint();
 
   const [curTabIdx, setCurTabIdx] = useState(0);
@@ -178,8 +180,7 @@ const Editor = () => {
     return tabs;
   }, [curOpenFiles, openedFiles, breakpoint]);
 
-  const PanelComponent =
-    !projectCtx.isCompact || !projectCtx.isEmbed ? Panel : "div";
+  const currentTab = Math.min(Math.max(curTabIdx, 0), tabs.length - 1);
 
   return (
     <EditorContext.Provider
@@ -189,9 +190,9 @@ const Editor = () => {
         onDeleteFile,
       }}
     >
-      <PanelComponent className="h-full relative flex flex-col">
+      <div className="h-full relative flex flex-col">
         <ResizablePanelGroup
-          autoSaveId="veditor-panel"
+          autoSaveId={!isEmbed ? "veditor-panel" : null}
           direction="horizontal"
           className="flex-1 order-2 md:order-1"
         >
@@ -206,15 +207,36 @@ const Editor = () => {
           <ResizableHandle className="w-0" />
 
           <ResizablePanel defaultSize={{ md: 100, lg: 75 }}>
-            <ResizablePanelGroup autoSaveId="code-editor" direction="vertical">
+            <ResizablePanelGroup
+              autoSaveId={!isEmbed ? "code-editor" : null}
+              direction="vertical"
+            >
               <ResizablePanel defaultSize={{ sm: 100, md: 80 }} minSize={20}>
-                <Tabs
-                  tabs={tabs}
-                  current={Math.min(Math.max(curTabIdx, 0), tabs.length - 1)}
-                  onChange={setCurTabIdx}
-                  onClose={onCloseFile}
-                  className="h-full"
-                />
+                <div className="w-full h-full flex flex-col items-stretch bg-slate-800">
+                  <div className="flex items-center">
+                    <Tabs
+                      tabs={tabs}
+                      current={currentTab}
+                      onChange={setCurTabIdx}
+                      onClose={onCloseFile}
+                      className="flex-1 p-1 md:h-12 md:p-1.5 md:gap-1.5"
+                    />
+                    <Button
+                      variant="ghost"
+                      className="dark:hover:bg-slate-700"
+                      onClick={() =>
+                        window.open(`${BASE_URL}/${project.slug}`, "_blank")
+                      }
+                    >
+                      <FaExternalLinkAlt />
+                    </Button>
+                  </div>
+                  <TabView
+                    tabs={tabs}
+                    current={currentTab}
+                    className="flex-1"
+                  />
+                </div>
               </ResizablePanel>
 
               {breakpoint >= 2 ? (
@@ -236,7 +258,7 @@ const Editor = () => {
         </ResizablePanelGroup>
 
         <StatusBar className="order-1 md:order-2" />
-      </PanelComponent>
+      </div>
 
       <SettingsDialog />
     </EditorContext.Provider>

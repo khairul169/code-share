@@ -17,11 +17,11 @@ import { useProjectContext } from "../context/project";
 
 const StatusBar = ({ className }: React.ComponentProps<"div">) => {
   const { user, urlPathname } = usePageContext();
-  const { isCompact, project } = useProjectContext();
+  const { isEmbed, project } = useProjectContext();
   const sidebarExpanded = useStore(sidebarStore, (i) => i.expanded);
   const previewExpanded = useStore(previewStore, (i) => i.open);
 
-  if (isCompact) {
+  if (isEmbed) {
     return null;
   }
 

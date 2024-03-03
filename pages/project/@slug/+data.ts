@@ -12,7 +12,7 @@ export const data = async (ctx: PageContext) => {
     throw render(404, "Project not found!");
   }
 
-  const files = await trpc.file.getAll({ projectId: project.id });
+  const files = await trpc.file.getAll({ projectId: project.id! });
   const initialFiles = files.filter((i) =>
     filesParam != null ? filesParam.includes(i.path) : i.isPinned
   );

@@ -1,5 +1,4 @@
 /* eslint-disable react/display-name */
-import Panel from "~/components/ui/panel";
 import { ComponentProps, useCallback, useEffect, useRef } from "react";
 import { useProjectContext } from "../context/project";
 import { Button } from "~/components/ui/button";
@@ -56,8 +55,6 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
     refresh();
   }, [refresh, togglePanel]);
 
-  const PanelComponent = !project.isCompact || !project.isEmbed ? Panel : "div";
-
   return (
     <ResizablePanel
       ref={panelRef}
@@ -65,8 +62,8 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
       onCollapse={() => previewStore.setState({ open: false })}
       {...props}
     >
-      <PanelComponent className="h-full flex flex-col bg-slate-800">
-        <div className="h-10 hidden md:flex items-center pl-4">
+      <div className="h-full flex flex-col bg-slate-800">
+        <div className="h-10 md:h-12 hidden md:flex items-center pl-4">
           <p className="flex-1 truncate text-xs uppercase">Preview</p>
           <Button
             variant="ghost"
@@ -75,13 +72,16 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
           >
             <FaRedo />
           </Button>
-          <Button
-            variant="ghost"
-            className="dark:hover:bg-slate-700"
-            onClick={() => window.open(url || "#", "_blank")}
-          >
-            <FaExternalLinkAlt />
-          </Button>
+
+          {!project.isEmbed ? (
+            <Button
+              variant="ghost"
+              className="dark:hover:bg-slate-700"
+              onClick={() => window.open(url || "#", "_blank")}
+            >
+              <FaExternalLinkAlt />
+            </Button>
+          ) : null}
         </div>
 
         {url != null ? (
@@ -92,7 +92,7 @@ const WebPreview = ({ url, ...props }: WebPreviewProps) => {
             sandbox="allow-scripts allow-forms"
           />
         ) : null}
-      </PanelComponent>
+      </div>
     </ResizablePanel>
   );
 };

@@ -23,12 +23,9 @@ const ViewProjectPage = () => {
   return (
     <ProjectContext.Provider value={{ project, isCompact, isEmbed }}>
       <ResizablePanelGroup
-        autoSaveId="main-panel"
+        autoSaveId={!isEmbed ? "main-panel" : null}
         direction={{ sm: "vertical", md: "horizontal" }}
-        className={cn(
-          "w-full !h-dvh bg-slate-600",
-          !isCompact && !isEmbed ? "md:p-4" : ""
-        )}
+        className={cn("w-full !h-screen")}
       >
         <ResizablePanel
           defaultSize={hidePreview ? 100 : 60}
@@ -38,14 +35,7 @@ const ViewProjectPage = () => {
         >
           <Editor />
         </ResizablePanel>
-        <ResizableHandle
-          withHandle
-          className={
-            !isCompact && !isEmbed
-              ? "bg-slate-800 md:bg-transparent hover:bg-slate-500 transition-colors md:mx-1 w-2 md:data-[panel-group-direction=vertical]:h-2 md:rounded-lg"
-              : "bg-slate-800"
-          }
-        />
+        <ResizableHandle withHandle={!isEmbed && !isCompact} />
         <WebPreview
           defaultSize={40}
           defaultCollapsed={hidePreview}

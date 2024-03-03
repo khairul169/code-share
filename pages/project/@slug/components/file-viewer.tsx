@@ -15,7 +15,7 @@ type Props = {
 const FileViewer = ({ id }: Props) => {
   const { project } = useProjectContext();
   const { initialFiles } = useData<Data>();
-  const initialData = initialFiles.find((i) => i.id === id);
+  const initialData = initialFiles.find((i) => i.id === id) as any;
 
   const { data, isLoading, refetch } = trpc.file.getById.useQuery(id, {
     initialData,

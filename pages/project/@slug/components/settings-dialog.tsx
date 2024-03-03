@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useProjectContext } from "../context/project";
 import { useForm, useFormReturn } from "~/hooks/useForm";
 import Input from "~/components/ui/input";
@@ -21,8 +21,10 @@ import {
 import trpc from "~/lib/trpc";
 import { toast } from "~/lib/utils";
 import Checkbox from "~/components/ui/checkbox";
-import Tabs, { Tab } from "~/components/ui/tabs";
+import Tabs, { Tab, TabView } from "~/components/ui/tabs";
 import { navigate } from "vike/client/router";
+import { useFieldArray } from "react-hook-form";
+import { FaTrashAlt } from "react-icons/fa";
 
 const defaultValues: ProjectSettingsSchema = {
   title: "",
@@ -102,8 +104,9 @@ const SettingsDialog = () => {
             tabs={tabs}
             current={tab}
             onChange={setTab}
-            containerClassName="mt-4"
+            className="rounded-md overflow-hidden"
           />
+          <TabView current={tab} tabs={tabs} className="mt-4" />
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-4 mt-8">
             <Button variant="outline" onClick={onClose}>
@@ -157,17 +160,55 @@ const CSSTab = ({ form }: TabProps) => {
 };
 
 const JSTab = ({ form }: TabProps) => {
+  const packages = useFieldArray({
+    control: form.control,
+    name: "settings.js.packages",
+  });
+
   return (
-    <div className="space-y-3">
+    <div>
       <Select
         form={form}
         name="settings.js.transpiler"
         label="Transpiler"
         items={jsTranspilerList}
       />
-      <p className="text-sm">
+      <p className="text-sm mt-1">
         * Set transpiler to <strong>SWC</strong> to use JSX
       </p>
+
+      <p className="text-sm mt-8">External Packages</p>
+      <div>
+        {packages.fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2 mt-2">
+            <Input
+              key={field.id}
+              form={form}
+              name={`settings.js.packages.${index}.name`}
+              placeholder={`Package alias`}
+              className="flex-1"
+            />
+
+            <Input
+              key={field.id}
+              form={form}
+              name={`settings.js.packages.${index}.url`}
+              placeholder={`URL`}
+              className="flex-1"
+            />
+
+            <Button size="icon" onClick={() => packages.remove(index)}>
+              <FaTrashAlt />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <Button
+        onClick={() => packages.append({ name: "", url: "" })}
+        className="mt-3"
+      >
+        Add Package
+      </Button>
     </div>
   );
 };

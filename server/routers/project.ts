@@ -55,20 +55,20 @@ const projectRouter = router({
         isNull(project.deletedAt)
       );
 
-      const result = await db.query.project.findFirst({
+      const projectData = await db.query.project.findFirst({
         where,
         with: {
           user: { columns: { password: false } },
         },
       });
 
-      if (!hasPermission(ctx, result, "r")) {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (!projectData || !hasPermission(ctx, projectData, "r")) {
+        return null;
       }
 
-      const isMutable = hasPermission(ctx, result, "w");
+      const isMutable = hasPermission(ctx, projectData, "w");
 
-      return { ...result, isMutable };
+      return { ...projectData!, isMutable };
     }),
 
   create: procedure

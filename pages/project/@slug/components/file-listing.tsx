@@ -39,7 +39,7 @@ const FileListing = () => {
 
   return (
     <Fragment>
-      <div className="h-10 flex items-center pl-4 pr-1">
+      <div className="h-10 md:h-12 flex items-center pl-4 pr-1">
         <p className="text-xs uppercase truncate flex-1">{project.title}</p>
         <ActionButton
           icon={FiFilePlus}
