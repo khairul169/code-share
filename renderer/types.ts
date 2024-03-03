@@ -8,6 +8,7 @@ declare global {
       data?: {
         title?: string;
         description?: string;
+        ogImage?: string;
       };
       config: {
         title?: string;

@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom/client";
-import { getPageMetadata } from "./utils";
+import { getPageTitle } from "./utils";
 import type { OnRenderClientAsync } from "vike/types";
 import Layout from "./app";
 
@@ -33,6 +33,5 @@ export const onRenderClient: OnRenderClientAsync = async (
     root.render(page);
   }
 
-  const meta = getPageMetadata(pageContext);
-  document.title = meta.title;
+  document.title = getPageTitle(pageContext);
 };

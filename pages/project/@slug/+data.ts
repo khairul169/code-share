@@ -1,6 +1,7 @@
 import { PageContext } from "vike/types";
 import { render } from "vike/abort";
 import trpcServer from "~/server/api/trpc/trpc";
+import { BASE_URL } from "~/lib/consts";
 
 export const data = async (ctx: PageContext) => {
   const trpc = await trpcServer(ctx);
@@ -20,6 +21,9 @@ export const data = async (ctx: PageContext) => {
   return {
     title: project.title,
     description: `Check ${project.title} on CodeShare!`,
+    ogImage: project.thumbnail
+      ? BASE_URL + "/api/thumbnail" + project.thumbnail
+      : undefined,
     project,
     files,
     initialFiles,

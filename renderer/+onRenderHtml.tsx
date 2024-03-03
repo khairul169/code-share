@@ -21,7 +21,7 @@ export const onRenderHtml: OnRenderHtmlAsync = async (
   );
 
   // See https://vike.dev/head
-  const meta = getPageMetadata(pageContext);
+  const metadata = getPageMetadata(pageContext);
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en" class="dark">
@@ -29,8 +29,7 @@ export const onRenderHtml: OnRenderHtmlAsync = async (
         <meta charset="UTF-8" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="${meta.description}" />
-        <title>${meta.title}</title>
+        ${dangerouslySkipEscape(metadata)}
       </head>
       <body>
         <div id="react-root">${dangerouslySkipEscape(page)}</div>
