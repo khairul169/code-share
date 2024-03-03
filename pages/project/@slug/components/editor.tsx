@@ -88,9 +88,11 @@ const Editor = () => {
 
   useEffect(() => {
     const itv = setInterval(() => generateThumbnail.mutate(), 60000);
+    const generate = setTimeout(() => generateThumbnail.mutate(), 1000);
 
     return () => {
       clearInterval(itv);
+      clearTimeout(generate);
     };
   }, []);
 
