@@ -1,0 +1,7 @@
+@baseUrl = http://localhost:3001
+
+GET {{baseUrl}}/api/thumbnail/t2mo3o3j.jpg
+
+###
+
+PATCH  {{baseUrl}}/api/thumbnail/t2mo3o3j

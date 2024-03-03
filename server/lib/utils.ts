@@ -12,8 +12,12 @@ export const fileExists = (path: string) => {
   }
 };
 
+export const getStorageDir = (...args: string[]) => {
+  return path.join(process.cwd(), "storage", ...args);
+};
+
 export const getProjectDir = (project: ProjectSchema) => {
-  return path.resolve(process.cwd(), "storage/tmp", project.slug);
+  return path.join(process.cwd(), "storage/tmp", project.slug);
 };
 
 export const uid = cuid2.init({

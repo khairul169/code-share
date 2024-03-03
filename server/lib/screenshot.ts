@@ -3,7 +3,7 @@ import puppeteer, { Browser } from "puppeteer";
 let browser: Browser | null = null;
 let closeHandler: any;
 
-export const screenshot = async (slug: string) => {
+export const screenshot = async (url: string) => {
   try {
     if (!browser) {
       browser = await puppeteer.launch({
@@ -15,12 +15,15 @@ export const screenshot = async (slug: string) => {
     const page = await browser.newPage();
 
     await page.setViewport({ width: 512, height: 340 });
-    await page.goto(`http://localhost:3000/api/preview/${slug}/index.html`, {
+    await page.goto(url, {
       waitUntil: "networkidle0",
       timeout: 5000,
     });
     const result = await page.screenshot();
-    await page.close();
+
+    setTimeout(() => {
+      page.close();
+    }, 500);
 
     if (closeHandler) {
       clearTimeout(closeHandler);
@@ -30,7 +33,7 @@ export const screenshot = async (slug: string) => {
       browser?.close();
       browser = null;
       closeHandler = null;
-    }, 60000);
+    }, 30000);
 
     return result;
   } catch (err) {

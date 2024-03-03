@@ -16,16 +16,16 @@ CREATE TABLE `files` (
 --> statement-breakpoint
 CREATE TABLE `projects` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`fork_id` integer;
 	`user_id` integer NOT NULL,
+	`fork_id` integer,
 	`slug` text NOT NULL,
 	`title` text NOT NULL,
 	`visibility` text DEFAULT 'private',
 	`settings` text DEFAULT [object Object],
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`deleted_at` text,
-	FOREIGN KEY (`fork_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`fork_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `users` (

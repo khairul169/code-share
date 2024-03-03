@@ -32,6 +32,7 @@ export const project = sqliteTable(
     forkId: integer("fork_id"),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
+    thumbnail: text("thumbnail"),
 
     visibility: text("visibility", {
       enum: ["public", "private", "unlisted"],

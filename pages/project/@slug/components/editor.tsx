@@ -20,6 +20,8 @@ import StatusBar from "./status-bar";
 import { FiTerminal } from "react-icons/fi";
 import SettingsDialog from "./settings-dialog";
 import FileIcon from "~/components/ui/file-icon";
+import { api } from "~/lib/api";
+import { useMutation } from "@tanstack/react-query";
 
 const Editor = () => {
   const { project, initialFiles } = useData<Data>();
@@ -33,10 +35,16 @@ const Editor = () => {
   );
 
   const openedFilesData = trpc.file.getAll.useQuery(
-    { projectId: project.id, id: curOpenFiles },
+    { projectId: project.id!, id: curOpenFiles },
     { enabled: curOpenFiles.length > 0, initialData: initialFiles }
   );
   const [openedFiles, setOpenedFiles] = useState<any[]>(initialFiles);
+
+  const generateThumbnail = useMutation({
+    mutationFn: () => {
+      return api(`/thumbnail/${project.slug!}`, { method: "PATCH" });
+    },
+  });
 
   const deleteFile = trpc.file.delete.useMutation({
     onSuccess: (file) => {
@@ -75,6 +83,14 @@ const Editor = () => {
   //   // start API sandbox
   //   api(`/sandbox/${project.slug}/start`, { method: "POST" }).catch(() => {});
   // }, [project]);
+
+  useEffect(() => {
+    const itv = setInterval(() => generateThumbnail.mutate(), 60000);
+
+    return () => {
+      clearInterval(itv);
+    };
+  }, []);
 
   const onOpenFile = useCallback(
     (fileId: number, autoSwitchTab = true) => {
