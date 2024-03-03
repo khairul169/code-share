@@ -87,6 +87,10 @@ const Editor = () => {
   // }, [project]);
 
   useEffect(() => {
+    if (isEmbed) {
+      return;
+    }
+
     const itv = setInterval(() => generateThumbnail.mutate(), 60000);
     const generate = setTimeout(() => generateThumbnail.mutate(), 1000);
 
@@ -94,7 +98,7 @@ const Editor = () => {
       clearInterval(itv);
       clearTimeout(generate);
     };
-  }, []);
+  }, [isEmbed]);
 
   const onOpenFile = useCallback(
     (fileId: number, autoSwitchTab = true) => {
