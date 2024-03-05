@@ -1,4 +1,3 @@
-import { getFileExt } from "~/lib/utils";
 import trpc from "~/lib/trpc";
 import { useData } from "~/renderer/hooks";
 import { Data } from "../+data";
@@ -6,7 +5,8 @@ import Spinner from "~/components/ui/spinner";
 import { previewStore } from "../stores/web-preview";
 import { useProjectContext } from "../context/project";
 import { Suspense, lazy } from "react";
-const CodeEditor = lazy(() => import("~/components/ui/code-editor"));
+import CodeEditor from "~/components/ui/code-editor";
+// const CodeEditor = lazy(() => import("~/components/ui/code-editor"));
 
 type Props = {
   id: number;
@@ -44,21 +44,20 @@ const FileViewer = ({ id }: Props) => {
   const { filename } = data;
 
   if (!data.isFile) {
-    const ext = getFileExt(filename);
-
     return (
       <Suspense fallback={<LoadingLayout />}>
         <CodeEditor
-          lang={ext}
+          filename={filename}
+          path={data.path}
           value={data?.content || ""}
           formatOnSave
-          onChange={(val) =>
+          onChange={(val) => {
             updateFileContent.mutate({
               projectId: project.id,
               id,
               content: val,
-            })
-          }
+            });
+          }}
         />
       </Suspense>
     );
