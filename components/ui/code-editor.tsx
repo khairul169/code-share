@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CodeiumEditor } from "@codeium/react-code-editor/dist/esm";
+
 import prettier from "prettier/standalone";
 import prettierHtmlPlugin from "prettier/plugins/html";
 import prettierCssPlugin from "prettier/plugins/postcss";
 import prettierBabelPlugin from "prettier/plugins/babel";
 import * as prettierPluginEstree from "prettier/plugins/estree";
+
 import { useDebounce } from "~/hooks/useDebounce";
 import useCommandKey from "~/hooks/useCommandKey";
-import { getFileExt } from "~/lib/utils";
+import { getFileExt, toast } from "~/lib/utils";
 
 type Props = {
   filename?: string;
@@ -24,6 +26,28 @@ const CodeEditor = (props: Props) => {
   const [data, setData] = useState(value);
   const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
   const language = useMemo(() => getLanguage(filename), [filename]);
+
+  const onMount = useCallback((editor: any, monaco: any) => {
+    editorRef.current = editor;
+
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.Latest,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.CommonJS,
+      noEmit: true,
+      esModuleInterop: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      reactNamespace: "React",
+      allowJs: true,
+      typeRoots: ["node_modules/@types"],
+    });
+
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+    });
+  }, []);
 
   const onSave = useCallback(async () => {
     const editor = editorRef.current;
@@ -56,11 +80,11 @@ const CodeEditor = (props: Props) => {
       model.setValue(formatted);
       const newCursor = model.getPositionAt(cursorOffset);
       editor.setPosition(newCursor);
-      console.log("huhu set cursor");
 
       onChange(formatted);
     } catch (err) {
-      console.log("prettier error", err);
+      console.error(err);
+      toast.error((err as any)?.message || "Cannot format code!");
       onChange(content);
     }
 
@@ -81,9 +105,7 @@ const CodeEditor = (props: Props) => {
         path={path || filename}
         value={data}
         height="100%"
-        onMount={(editor: any, _monaco: any) => {
-          editorRef.current = editor;
-        }}
+        onMount={onMount}
         onChange={(e: string) => debounceChange(e)}
       />
     </div>
