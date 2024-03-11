@@ -9,7 +9,7 @@ export function getPageTitle(pageContext: PageContext) {
 }
 
 export function getPageMetadata(pageContext: PageContext) {
-  const canonicalUrl = BASE_URL + pageContext.req.url;
+  const canonicalUrl = BASE_URL + pageContext.req.originalUrl;
   const title = getPageTitle(pageContext);
   const description =
     pageContext.data?.description ||
