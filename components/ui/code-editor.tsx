@@ -33,7 +33,8 @@ const CodeEditor = (props: Props) => {
 
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.languages.typescript.ScriptTarget.Latest,
-      allowNonTsExtensions: true,
+      allowNonTsExtensions: false,
+      allowImportingTsExtensions: true,
       moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
       module: monaco.languages.typescript.ModuleKind.CommonJS,
       noEmit: true,
