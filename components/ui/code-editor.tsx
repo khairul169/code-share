@@ -11,6 +11,11 @@ import { useDebounce } from "~/hooks/useDebounce";
 import useCommandKey from "~/hooks/useCommandKey";
 import { getFileExt, toast } from "~/lib/utils";
 
+type InitFileData = {
+  path: string;
+  value: string;
+};
+
 type Props = {
   filename?: string;
   path?: string;
@@ -19,17 +24,28 @@ type Props = {
   onChange: (val: string) => void;
   formatOnSave?: boolean;
   isReadOnly?: boolean;
+  initialFiles?: InitFileData[];
 };
 
 const CodeEditor = (props: Props) => {
-  const { filename, path, value, formatOnSave, isReadOnly, onChange } = props;
+  const {
+    filename,
+    path,
+    value,
+    formatOnSave,
+    isReadOnly,
+    onChange,
+    initialFiles,
+  } = props;
   const editorRef = useRef<any>(null);
+  const monacoRef = useRef<any>(null);
   const [isMounted, setMounted] = useState(false);
   const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
   const language = useMemo(() => getLanguage(filename), [filename]);
 
   const onMount = useCallback((editor: any, monaco: any) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
 
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.languages.typescript.ScriptTarget.Latest,
@@ -44,14 +60,32 @@ const CodeEditor = (props: Props) => {
       allowJs: true,
       typeRoots: ["node_modules/@types"],
     });
-
+    monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: false,
       noSyntaxValidation: false,
     });
 
     setMounted(true);
+    loadExternalLibs(monaco);
   }, []);
+
+  useEffect(() => {
+    const monaco = monacoRef.current;
+    if (!isMounted || !monaco || !initialFiles?.length) {
+      return;
+    }
+
+    initialFiles.forEach((i) => {
+      const uri = monaco.Uri.parse(i.path);
+      const existingModel = monaco.editor.getModel(uri);
+
+      if (!existingModel) {
+        const lang = getLanguage(i.path);
+        monaco.editor.createModel(i.value, lang?.name || "", uri);
+      }
+    });
+  }, [initialFiles, isMounted]);
 
   const onSave = useCallback(async () => {
     if (isReadOnly) {
@@ -238,5 +272,25 @@ function getLanguage(filename?: string | null) {
 
   return { name, formatter };
 }
+
+const loadExternalLibs = async (monaco: any) => {
+  const libs = [
+    {
+      name: "react",
+      url: "https://unpkg.com/@types/react@18.2.65/index.d.ts",
+      uri: "file:///node_modules/@types/react/index.d.ts",
+    },
+  ];
+
+  libs.forEach(async (lib) => {
+    try {
+      const res = await fetch(lib.url);
+      const data = await res.text();
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(data, lib.uri);
+    } catch (err) {
+      console.error(`Cannot load ${lib.name} lib!`, err);
+    }
+  });
+};
 
 export default CodeEditor;
