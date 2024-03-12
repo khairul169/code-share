@@ -40,15 +40,13 @@ const FileViewer = ({ id }: Props) => {
     return <p>File not found.</p>;
   }
 
-  const { filename } = data;
-
   if (!data.isFile) {
     return (
       <Suspense fallback={<LoadingLayout />}>
         <CodeEditor
-          filename={filename}
+          filename={data.filename}
           path={data.path}
-          value={data?.content || ""}
+          value={data.content || ""}
           formatOnSave
           onChange={(val) => {
             updateFileContent.mutate({
