@@ -17,7 +17,7 @@ const FileViewer = ({ id }: Props) => {
   const { initialFiles } = useData<Data>();
   const initialData = initialFiles.find((i) => i.id === id) as any;
 
-  const { data, isLoading, refetch } = trpc.file.getById.useQuery(id, {
+  const { data, isLoading } = trpc.file.getById.useQuery(id, {
     initialData,
   });
 
@@ -29,7 +29,6 @@ const FileViewer = ({ id }: Props) => {
   const updateFileContent = trpc.file.update.useMutation({
     onSuccess: () => {
       onFileContentChange();
-      refetch();
     },
   });
 

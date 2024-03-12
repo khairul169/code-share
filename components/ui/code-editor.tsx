@@ -23,6 +23,7 @@ type Props = {
 const CodeEditor = (props: Props) => {
   const { filename, path, value, formatOnSave, wordWrap, onChange } = props;
   const editorRef = useRef<any>(null);
+  const [isMounted, setMounted] = useState(false);
   const [data, setData] = useState(value);
   const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
   const language = useMemo(() => getLanguage(filename), [filename]);
@@ -47,6 +48,8 @@ const CodeEditor = (props: Props) => {
       noSemanticValidation: false,
       noSyntaxValidation: false,
     });
+
+    setMounted(true);
   }, []);
 
   const onSave = useCallback(async () => {
@@ -77,7 +80,15 @@ const CodeEditor = (props: Props) => {
         }
       );
 
-      model.setValue(formatted);
+      // model.setValue(formatted);
+      editor.executeEdits("", [
+        {
+          range: editor.getModel()!.getFullModelRange(),
+          text: formatted,
+          forceMoveMarkers: true,
+        },
+      ]);
+
       const newCursor = model.getPositionAt(cursorOffset);
       editor.setPosition(newCursor);
 
@@ -93,6 +104,19 @@ const CodeEditor = (props: Props) => {
 
   useEffect(() => {
     setData(value);
+
+    const editor = editorRef.current;
+    const model = editor?.getModel();
+
+    if (editor && model?.uri.path.substring(1) === path) {
+      editor.executeEdits("", [
+        {
+          range: editor.getModel()!.getFullModelRange(),
+          text: value,
+          forceMoveMarkers: true,
+        },
+      ]);
+    }
   }, [value]);
 
   useCommandKey("s", onSave);
@@ -100,10 +124,10 @@ const CodeEditor = (props: Props) => {
   return (
     <div className="w-full h-full code-editor">
       <CodeiumEditor
-        language={language.name}
+        defaultLanguage={language.name}
         theme="vs-dark"
-        path={path || filename}
-        value={data}
+        path={path}
+        defaultValue={value}
         height="100%"
         onMount={onMount}
         onChange={(e: string) => debounceChange(e)}
