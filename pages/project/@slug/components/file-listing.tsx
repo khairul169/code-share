@@ -58,12 +58,12 @@ const FileListing = () => {
             <ActionButton icon={FiMoreVertical} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem>Upload File</DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuItem>Upload File</DropdownMenuItem> */}
+            {/* <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={() => settingsDialog.setState(true)}>
               Project Settings
             </DropdownMenuItem>
-            <DropdownMenuItem>Download Project</DropdownMenuItem>
+            {/* <DropdownMenuItem>Download Project</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

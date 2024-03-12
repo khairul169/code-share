@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { ProjectSchema } from "~/server/db/schema/project";
 
 type TProjectContext = {
-  project: ProjectSchema;
+  project: ProjectSchema & { isMutable: boolean };
   isCompact?: boolean;
   isEmbed?: boolean;
 };

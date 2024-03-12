@@ -47,8 +47,13 @@ const FileViewer = ({ id }: Props) => {
           filename={data.filename}
           path={data.path}
           value={data.content || ""}
+          isReadOnly={!project.isMutable}
           formatOnSave
           onChange={(val) => {
+            if (!project.isMutable) {
+              return;
+            }
+
             updateFileContent.mutate({
               projectId: project.id,
               id,

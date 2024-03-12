@@ -18,13 +18,13 @@ type Props = {
   wordWrap?: boolean;
   onChange: (val: string) => void;
   formatOnSave?: boolean;
+  isReadOnly?: boolean;
 };
 
 const CodeEditor = (props: Props) => {
-  const { filename, path, value, formatOnSave, wordWrap, onChange } = props;
+  const { filename, path, value, formatOnSave, isReadOnly, onChange } = props;
   const editorRef = useRef<any>(null);
   const [isMounted, setMounted] = useState(false);
-  const [data, setData] = useState(value);
   const [debounceChange, resetDebounceChange] = useDebounce(onChange, 3000);
   const language = useMemo(() => getLanguage(filename), [filename]);
 
@@ -54,6 +54,10 @@ const CodeEditor = (props: Props) => {
   }, []);
 
   const onSave = useCallback(async () => {
+    if (isReadOnly) {
+      return;
+    }
+
     const editor = editorRef.current;
     if (!editor) {
       return;
@@ -101,24 +105,28 @@ const CodeEditor = (props: Props) => {
     }
 
     setTimeout(() => resetDebounceChange(), 100);
-  }, [language.formatter, formatOnSave, onChange, resetDebounceChange]);
+  }, [
+    language.formatter,
+    formatOnSave,
+    onChange,
+    resetDebounceChange,
+    isReadOnly,
+  ]);
 
-  useEffect(() => {
-    setData(value);
+  // useEffect(() => {
+  //   const editor = editorRef.current;
+  //   const model = editor?.getModel();
 
-    const editor = editorRef.current;
-    const model = editor?.getModel();
-
-    if (editor && model?.uri.path.substring(1) === path) {
-      editor.executeEdits("", [
-        {
-          range: editor.getModel()!.getFullModelRange(),
-          text: value,
-          forceMoveMarkers: true,
-        },
-      ]);
-    }
-  }, [value]);
+  //   if (editor && model?.uri.path.substring(1) === path) {
+  //     editor.executeEdits("", [
+  //       {
+  //         range: editor.getModel()!.getFullModelRange(),
+  //         text: value,
+  //         forceMoveMarkers: true,
+  //       },
+  //     ]);
+  //   }
+  // }, [value]);
 
   useCommandKey("s", onSave);
 
@@ -131,7 +139,12 @@ const CodeEditor = (props: Props) => {
         defaultValue={value}
         height="100%"
         onMount={onMount}
-        onChange={(e: string) => debounceChange(e)}
+        options={{ readOnly: isReadOnly }}
+        onChange={(e: string) => {
+          if (!isReadOnly) {
+            debounceChange(e);
+          }
+        }}
       />
     </div>
   );
